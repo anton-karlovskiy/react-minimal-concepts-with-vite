@@ -1,5 +1,5 @@
-import { useZStore } from '../state/zustand';
-import { useState } from 'react';
+import { useZStore } from "../state/zustand";
+import { useState } from "react";
 
 export default function ZustandDemo() {
   const count = useZStore(s => s.count);
@@ -8,19 +8,19 @@ export default function ZustandDemo() {
   const todos = useZStore(s => s.todos);
   const addTodo = useZStore(s => s.addTodo);
   const toggle = useZStore(s => s.toggle);
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
 
   return (
     <section>
       <p><strong>Zustand</strong>: tiny, hook-first store with minimal boilerplate.</p>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: "flex", gap: 8 }}>
         <button onClick={dec}>-</button>
-        <div style={{ minWidth: 40, textAlign: 'center' }}>{count}</div>
+        <div style={{ minWidth: 40, textAlign: "center" }}>{count}</div>
         <button onClick={inc}>+</button>
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { addTodo(text); setText(''); } }}>
+        <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { addTodo(text); setText(""); } }}>
           <input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
           <button type="submit" style={{ marginLeft: 8 }}>Add</button>
         </form>
@@ -29,7 +29,7 @@ export default function ZustandDemo() {
             <li key={t.id}>
               <label>
                 <input type="checkbox" checked={t.done} onChange={() => toggle(t.id)} />
-                {' '}<span style={{ textDecoration: t.done ? 'line-through' : 'none' }}>{t.text}</span>
+                {" "}<span style={{ textDecoration: t.done ? "line-through" : "none" }}>{t.text}</span>
               </label>
             </li>
           ))}

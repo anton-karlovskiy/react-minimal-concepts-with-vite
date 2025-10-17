@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState } from "react";
 
 /**
  * BatchingDemo - Demonstrates React 18's Automatic Batching

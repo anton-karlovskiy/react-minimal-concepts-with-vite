@@ -1,9 +1,9 @@
-import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type Todo = { id: string; text: string; done: boolean };
 
 const counterSlice = createSlice({
-  name: 'counter',
+  name: "counter",
   initialState: { value: 0 },
   reducers: {
     inc(state) { state.value += 1; },
@@ -13,7 +13,7 @@ const counterSlice = createSlice({
 });
 
 const todosSlice = createSlice({
-  name: 'todos',
+  name: "todos",
   initialState: [] as Todo[],
   reducers: {
     addTodo(state, action: PayloadAction<string>) {

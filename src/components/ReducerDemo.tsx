@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useReducer } from "react";
 
 /**
  * ReducerDemo - Demonstrates useReducer Hook
@@ -43,7 +43,7 @@ export default function ReducerDemo() {
     <section>
       <p>Count: <strong>{state.count}</strong></p>
       
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+      <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
         <button onClick={() => dispatch({ type: "decrement", payload: "5" })}>
           -5
         </button>

@@ -1,9 +1,9 @@
-import { useMemo, useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from "react";
 
 const bigList = Array.from({length: 5000}, (_, i) => `Row ${i + 1}`);
 
 export default function TransitionDemo() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const filtered = useMemo(() => {
@@ -27,7 +27,7 @@ export default function TransitionDemo() {
         }}
       />
       {isPending && <p><em>Updating list…</em></p>}
-      <ul style={{ maxHeight: 200, overflow: 'auto', marginTop: 8 }}>
+      <ul style={{ maxHeight: 200, overflow: "auto", marginTop: 8 }}>
         {filtered.map((row) => <li key={row}>{row}</li>)}
       </ul>
     </section>
