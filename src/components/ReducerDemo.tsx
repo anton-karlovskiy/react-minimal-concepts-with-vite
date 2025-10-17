@@ -22,14 +22,14 @@ import { useReducer } from "react";
 const initialState = { count: 0 };
 
 type ACTIONTYPE =
-  | { type: "increment"; payload: number }
-  | { type: "decrement"; payload: string };
+  | { type: "INCREMENT"; payload: number }
+  | { type: "DECREMENT"; payload: string };
 
 function reducer(state: typeof initialState, action: ACTIONTYPE) {
   switch (action.type) {
-    case "increment":
+    case "INCREMENT":
       return { count: state.count + action.payload };
-    case "decrement":
+    case "DECREMENT":
       return { count: state.count - Number(action.payload) };
     default:
       throw new Error();
@@ -44,10 +44,10 @@ export default function ReducerDemo() {
       <p>Count: <strong>{state.count}</strong></p>
       
       <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-        <button onClick={() => dispatch({ type: "decrement", payload: "5" })}>
+        <button onClick={() => dispatch({ type: "DECREMENT", payload: "5" })}>
           -5
         </button>
-        <button onClick={() => dispatch({ type: "increment", payload: 5 })}>
+        <button onClick={() => dispatch({ type: "INCREMENT", payload: 5 })}>
           +5
         </button>
       </div>
