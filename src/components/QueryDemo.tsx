@@ -1,28 +1,28 @@
-import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
 
-const client = new QueryClient()
+const client = new QueryClient();
 
 async function fetchUsers(q: string) {
-  await new Promise(r => setTimeout(r, 700))
+  await new Promise(r => setTimeout(r, 700));
   const all = [
     { id: 1, name: 'Anton' },
     { id: 2, name: 'Ikem' },
     { id: 3, name: 'Ishan' },
     { id: 4, name: 'Diane' },
     { id: 5, name: 'Kai' },
-  ]
-  if (!q) return all
-  return all.filter(u => u.name.toLowerCase().includes(q.toLowerCase()))
+  ];
+  if (!q) return all;
+  return all.filter(u => u.name.toLowerCase().includes(q.toLowerCase()));
 }
 
 function UsersList() {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState('');
   const { data, isPending, isFetching, refetch } = useQuery({
     queryKey: ['users', query],
     queryFn: () => fetchUsers(query),
     staleTime: 10_000
-  })
+  });
 
   return (
     <section>
@@ -34,7 +34,7 @@ function UsersList() {
         {(data ?? []).map(u => <li key={u.id}>{u.name}</li>)}
       </ul>
     </section>
-  )
+  );
 }
 
 export default function QueryDemo() {
@@ -42,5 +42,5 @@ export default function QueryDemo() {
     <QueryClientProvider client={client}>
       <UsersList />
     </QueryClientProvider>
-  )
+  );
 }

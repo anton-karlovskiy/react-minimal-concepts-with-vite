@@ -1,13 +1,13 @@
-import { useDispatch, useSelector } from 'react-redux'
-import type { RootState } from '../state/store'
-import { inc, dec, addTodo, toggleTodo } from '../state/store'
-import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import type { RootState } from '../state/store';
+import { inc, dec, addTodo, toggleTodo } from '../state/store';
+import { useState } from 'react';
 
 export default function ReduxDemo() {
-  const dispatch = useDispatch()
-  const value = useSelector((s: RootState) => s.counter.value)
-  const todos = useSelector((s: RootState) => s.todos)
-  const [text, setText] = useState('')
+  const dispatch = useDispatch();
+  const value = useSelector((s: RootState) => s.counter.value);
+  const todos = useSelector((s: RootState) => s.todos);
+  const [text, setText] = useState('');
 
   return (
     <section>
@@ -19,7 +19,7 @@ export default function ReduxDemo() {
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { dispatch(addTodo(text)); setText('') } }}>
+        <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { dispatch(addTodo(text)); setText(''); } }}>
           <input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
           <button type="submit" style={{ marginLeft: 8 }}>Add</button>
         </form>
@@ -35,5 +35,5 @@ export default function ReduxDemo() {
         </ul>
       </div>
     </section>
-  )
+  );
 }

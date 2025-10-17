@@ -1,46 +1,46 @@
-import { useActionState, useOptimistic } from 'react'
-import { useFormStatus } from 'react-dom'
-import { useState } from 'react'
+import { useActionState, useOptimistic } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useState } from 'react';
 
 async function postNoteServerLike(data: { text: string }) {
-  await new Promise(r => setTimeout(r, 900))
+  await new Promise(r => setTimeout(r, 900));
   if (Math.random() < 0.2) {
-    throw new Error('Random failure – please retry')
+    throw new Error('Random failure – please retry');
   }
-  return { id: Math.random().toString(36).slice(2), ...data }
+  return { id: Math.random().toString(36).slice(2), ...data };
 }
 
 function SubmitStatus() {
-  const status = useFormStatus()
+  const status = useFormStatus();
   return (
     <button type="submit" disabled={status.pending}>
       {status.pending ? 'Saving…' : 'Add Note'}
     </button>
-  )
+  );
 }
 
 export default function ActionsDemo() {
-  const [notes, setNotes] = useState<{id: string, text: string}[]>([])
+  const [notes, setNotes] = useState<{id: string, text: string}[]>([]);
   const [optimisticNotes, addOptimisticNote] = useOptimistic(notes, (state, newItem: {id: string, text: string}) => {
-    return [...state, newItem]
-  })
+    return [...state, newItem];
+  });
 
   async function addNote(prevState: string | null, formData: FormData) {
-    const text = String(formData.get('text') || '').trim()
-    if (!text) return 'Please enter some text'
-    const tempId = 'temp-' + Date.now()
-    addOptimisticNote({ id: tempId, text })
+    const text = String(formData.get('text') || '').trim();
+    if (!text) return 'Please enter some text';
+    const tempId = 'temp-' + Date.now();
+    addOptimisticNote({ id: tempId, text });
 
     try {
-      const saved = await postNoteServerLike({ text })
-      setNotes((list) => [...list, saved])
-      return null
+      const saved = await postNoteServerLike({ text });
+      setNotes((list) => [...list, saved]);
+      return null;
     } catch (e: any) {
-      return e?.message || 'Failed to save'
+      return e?.message || 'Failed to save';
     }
   }
 
-  const [error, formAction] = useActionState(addNote, null as string | null)
+  const [error, formAction] = useActionState(addNote, null as string | null);
 
   return (
     <section>
@@ -59,5 +59,5 @@ export default function ActionsDemo() {
         ))}
       </ul>
     </section>
-  )
+  );
 }

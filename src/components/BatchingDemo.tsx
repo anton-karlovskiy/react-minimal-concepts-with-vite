@@ -1,16 +1,16 @@
-import { useRef, useState } from 'react'
+import { useRef, useState } from 'react';
 
 export default function BatchingDemo() {
-  const [a, setA] = useState(0)
-  const [b, setB] = useState(0)
-  const renders = useRef(0)
-  renders.current++
+  const [a, setA] = useState(0);
+  const [b, setB] = useState(0);
+  const renders = useRef(0);
+  renders.current++;
 
   function updateOutsideEventLoop() {
     setTimeout(() => {
-      setA((x) => x + 1)
-      setB((y) => y + 1)
-    }, 0)
+      setA((x) => x + 1);
+      setB((y) => y + 1);
+    }, 0);
   }
 
   return (
@@ -20,5 +20,5 @@ export default function BatchingDemo() {
       <p>A: {a} — B: {b}</p>
       <small>Automatic batching ensures a single render for multiple state updates in async callbacks.</small>
     </section>
-  )
+  );
 }

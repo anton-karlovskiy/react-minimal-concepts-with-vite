@@ -1,14 +1,14 @@
-import { useZStore } from '../state/zustand'
-import { useState } from 'react'
+import { useZStore } from '../state/zustand';
+import { useState } from 'react';
 
 export default function ZustandDemo() {
-  const count = useZStore(s => s.count)
-  const inc = useZStore(s => s.inc)
-  const dec = useZStore(s => s.dec)
-  const todos = useZStore(s => s.todos)
-  const addTodo = useZStore(s => s.addTodo)
-  const toggle = useZStore(s => s.toggle)
-  const [text, setText] = useState('')
+  const count = useZStore(s => s.count);
+  const inc = useZStore(s => s.inc);
+  const dec = useZStore(s => s.dec);
+  const todos = useZStore(s => s.todos);
+  const addTodo = useZStore(s => s.addTodo);
+  const toggle = useZStore(s => s.toggle);
+  const [text, setText] = useState('');
 
   return (
     <section>
@@ -20,7 +20,7 @@ export default function ZustandDemo() {
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { addTodo(text); setText('') } }}>
+        <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { addTodo(text); setText(''); } }}>
           <input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
           <button type="submit" style={{ marginLeft: 8 }}>Add</button>
         </form>
@@ -36,5 +36,5 @@ export default function ZustandDemo() {
         </ul>
       </div>
     </section>
-  )
+  );
 }

@@ -1,20 +1,20 @@
-import { useMemo, useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react';
 
-const bigList = Array.from({length: 5000}, (_, i) => `Row ${i + 1}`)
+const bigList = Array.from({length: 5000}, (_, i) => `Row ${i + 1}`);
 
 export default function TransitionDemo() {
-  const [query, setQuery] = useState('')
-  const [isPending, startTransition] = useTransition()
+  const [query, setQuery] = useState('');
+  const [isPending, startTransition] = useTransition();
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase()
-    let result: string[] = []
+    const q = query.toLowerCase();
+    let result: string[] = [];
     for (let i = 0; i < bigList.length; i++) {
-      const v = bigList[i]
-      if (v.toLowerCase().includes(q)) result.push(v)
+      const v = bigList[i];
+      if (v.toLowerCase().includes(q)) result.push(v);
     }
-    return result
-  }, [query])
+    return result;
+  }, [query]);
 
   return (
     <section>
@@ -22,8 +22,8 @@ export default function TransitionDemo() {
       <input
         placeholder="Filter..."
         onChange={(e) => {
-          const v = e.target.value
-          startTransition(() => setQuery(v))
+          const v = e.target.value;
+          startTransition(() => setQuery(v));
         }}
       />
       {isPending && <p><em>Updating list…</em></p>}
@@ -31,5 +31,5 @@ export default function TransitionDemo() {
         {filtered.map((row) => <li key={row}>{row}</li>)}
       </ul>
     </section>
-  )
+  );
 }
