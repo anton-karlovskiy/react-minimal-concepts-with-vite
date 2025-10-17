@@ -6,6 +6,7 @@ import ActionsDemo from './components/ActionsDemo';
 import ReduxDemo from './components/ReduxDemo';
 import ZustandDemo from './components/ZustandDemo';
 import QueryDemo from './components/QueryDemo';
+import ReducerDemo from './components/ReducerDemo';
 import { store } from './state/store';
 
 export default function App() {
@@ -32,6 +33,12 @@ export default function App() {
           <div className="card" style={{flex: '1 1 360px'}}>
             <h2>Zustand</h2>
             <ZustandDemo />
+          </div>
+        </div>
+        <div className="row">
+          <div className="card" style={{flex: '1 1 360px'}}>
+            <h2>useReducer</h2>
+            <ReducerDemo />
           </div>
         </div>
         <div className="card">
