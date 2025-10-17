@@ -1,10 +1,11 @@
+import { Provider } from 'react-redux';
+
 import TransitionDemo from './components/TransitionDemo';
 import BatchingDemo from './components/BatchingDemo';
 import ActionsDemo from './components/ActionsDemo';
 import ReduxDemo from './components/ReduxDemo';
 import ZustandDemo from './components/ZustandDemo';
 import QueryDemo from './components/QueryDemo';
-import { Provider } from 'react-redux';
 import { store } from './state/store';
 
 export default function App() {
