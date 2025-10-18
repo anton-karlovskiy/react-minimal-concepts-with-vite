@@ -2,6 +2,7 @@ import { useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-quer
 import { useState } from "react";
 
 import Button from "./UI/Button";
+import Input from "./UI/Input";
 
 const client = new QueryClient();
 
@@ -29,7 +30,7 @@ function UsersList() {
   return (
     <section>
       <p><strong>TanStack Query</strong>: server cache for async data (dedup, caching, status).</p>
-      <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Filter users..." />
+      <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Filter users..." />
       <Button onClick={() => refetch()} className="ml-2">Refetch</Button>
       {(isPending || isFetching) && <p><em>Loading…</em></p>}
       <ul style={{ marginTop: 8 }}>

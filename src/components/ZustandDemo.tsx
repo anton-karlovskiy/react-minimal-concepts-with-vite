@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import Button from "./UI/Button";
+import Input from "./UI/Input";
 import { useZStore } from "../state/zustand";
 
 export default function ZustandDemo() {
@@ -23,7 +24,7 @@ export default function ZustandDemo() {
 
       <div style={{ marginTop: 12 }}>
         <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { addTodo(text); setText(""); } }}>
-          <input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
+          <Input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
           <Button type="submit" className="ml-2">Add</Button>
         </form>
         <ul style={{ marginTop: 8 }}>

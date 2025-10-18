@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Button from "./UI/Button";
+import Input from "./UI/Input";
 import type { RootState } from "../state/store";
 import { inc, dec, addTodo, toggleTodo } from "../state/store";
 
@@ -22,7 +23,7 @@ export default function ReduxDemo() {
 
       <div style={{ marginTop: 12 }}>
         <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { dispatch(addTodo(text)); setText(""); } }}>
-          <input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
+          <Input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
           <Button type="submit" className="ml-2">Add</Button>
         </form>
         <ul style={{ marginTop: 8 }}>

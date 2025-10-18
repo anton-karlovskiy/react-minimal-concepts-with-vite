@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from "react";
+import { createContext, useContext, useReducer } from "react";
 
 /**
  * ContextDemo - Demonstrates React Context with useReducer
@@ -48,7 +48,7 @@ function countReducer(state: State, action: Action): State {
 const initialState: State = { count: 0 };
 
 interface CountProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 function CountProvider({ children }: CountProviderProps) {

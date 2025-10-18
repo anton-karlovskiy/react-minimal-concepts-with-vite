@@ -1,4 +1,5 @@
 import { useMemo, useState, useTransition } from "react";
+import Input from "./UI/Input";
 
 const bigList = Array.from({length: 5000}, (_, i) => `Row ${i + 1}`);
 
@@ -19,7 +20,7 @@ export default function TransitionDemo() {
   return (
     <section>
       <p>Type to filter 5k rows. Input remains responsive thanks to <code>startTransition</code>.</p>
-      <input
+      <Input
         placeholder="Filter..."
         onChange={(e) => {
           const v = e.target.value;

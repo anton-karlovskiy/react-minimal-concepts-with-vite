@@ -17,7 +17,7 @@ export default function App() {
       <main>
         <h1>React 18/19 Minimal</h1>
         <small>Features: automatic batching, transitions, actions + optimistic UI, Redux vs Zustand, TanStack Query</small>
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <Card>
               <h2>Automatic Batching</h2>
