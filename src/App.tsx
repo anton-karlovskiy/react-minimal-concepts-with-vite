@@ -16,7 +16,7 @@ import { store } from "./state/store";
 export default function App() {
   return (
     <Provider store={store}>
-      <main>
+      <main className="p-6 bg-[#0b0b0c] text-[#f5f7fb]">
         <h1 className="my-2">React 18/19 Minimal</h1>
         <Small>Features: automatic batching, transitions, actions + optimistic UI, Redux vs Zustand, TanStack Query</Small>
         <div className="space-y-4">
