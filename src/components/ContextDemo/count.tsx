@@ -1,3 +1,4 @@
+import Button from "../Button";
 import { useCount } from "./count-context";
 
 function CountDisplay() {
@@ -15,8 +16,8 @@ function Counter() {
 
   return (
     <div className="space-x-2">
-      <button onClick={() => dispatch({ type: 'INCREMENT', payload: 1 })}>Increment</button>
-      <button onClick={() => dispatch({ type: 'DECREMENT', payload: 1 })}>Decrement</button>
+      <Button onClick={() => dispatch({ type: 'INCREMENT', payload: 1 })}>Increment</Button>
+      <Button onClick={() => dispatch({ type: 'DECREMENT', payload: 1 })}>Decrement</Button>
     </div>
   );
 }

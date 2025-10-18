@@ -1,5 +1,7 @@
 import { useReducer } from "react";
 
+import Button from "./Button";
+
 /**
  * ReducerDemo - Demonstrates useReducer Hook
  * 
@@ -43,12 +45,12 @@ export default function ReducerDemo() {
     <section>
       <p>Count: <strong>{state.count}</strong></p>
       <div className="space-x-2">
-        <button onClick={() => dispatch({ type: "DECREMENT", payload: "5" })}>
+        <Button onClick={() => dispatch({ type: "DECREMENT", payload: "5" })}>
           -5
-        </button>
-        <button onClick={() => dispatch({ type: "INCREMENT", payload: 5 })}>
+        </Button>
+        <Button onClick={() => dispatch({ type: "INCREMENT", payload: 5 })}>
           +5
-        </button>
+        </Button>
       </div>
       <small>
         useReducer provides predictable state updates through actions.

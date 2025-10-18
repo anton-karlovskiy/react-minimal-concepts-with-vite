@@ -1,5 +1,7 @@
-import { useZStore } from "../state/zustand";
 import { useState } from "react";
+
+import Button from "./Button";
+import { useZStore } from "../state/zustand";
 
 export default function ZustandDemo() {
   const count = useZStore(s => s.count);
@@ -14,15 +16,15 @@ export default function ZustandDemo() {
     <section>
       <p><strong>Zustand</strong>: tiny, hook-first store with minimal boilerplate.</p>
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={dec}>-</button>
+        <Button onClick={dec}>-</Button>
         <div style={{ minWidth: 40, textAlign: "center" }}>{count}</div>
-        <button onClick={inc}>+</button>
+        <Button onClick={inc}>+</Button>
       </div>
 
       <div style={{ marginTop: 12 }}>
         <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { addTodo(text); setText(""); } }}>
           <input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
-          <button type="submit" style={{ marginLeft: 8 }}>Add</button>
+          <Button type="submit" className="ml-2">Add</Button>
         </form>
         <ul style={{ marginTop: 8 }}>
           {todos.map(t => (

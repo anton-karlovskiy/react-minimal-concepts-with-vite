@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+import Button from "./Button";
 import type { RootState } from "../state/store";
 import { inc, dec, addTodo, toggleTodo } from "../state/store";
-import { useState } from "react";
 
 export default function ReduxDemo() {
   const dispatch = useDispatch();
@@ -13,15 +15,15 @@ export default function ReduxDemo() {
     <section>
       <p><strong>Redux Toolkit</strong>: predictable global state with immutable updates + devtools.</p>
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={() => dispatch(dec())}>-</button>
+        <Button onClick={() => dispatch(dec())}>-</Button>
         <div style={{ minWidth: 40, textAlign: "center" }}>{value}</div>
-        <button onClick={() => dispatch(inc())}>+</button>
+        <Button onClick={() => dispatch(inc())}>+</Button>
       </div>
 
       <div style={{ marginTop: 12 }}>
         <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) { dispatch(addTodo(text)); setText(""); } }}>
           <input value={text} onChange={e => setText(e.target.value)} placeholder="Add todo…" />
-          <button type="submit" style={{ marginLeft: 8 }}>Add</button>
+          <Button type="submit" className="ml-2">Add</Button>
         </form>
         <ul style={{ marginTop: 8 }}>
           {todos.map(t => (

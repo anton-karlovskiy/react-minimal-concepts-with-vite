@@ -2,6 +2,8 @@ import { useActionState, useOptimistic } from "react";
 import { useFormStatus } from "react-dom";
 import { useState } from "react";
 
+import Button from "./Button";
+
 async function postNoteServerLike(data: { text: string }) {
   await new Promise(r => setTimeout(r, 900));
   if (Math.random() < 0.2) {
@@ -13,9 +15,9 @@ async function postNoteServerLike(data: { text: string }) {
 function SubmitStatus() {
   const status = useFormStatus();
   return (
-    <button type="submit" disabled={status.pending}>
+    <Button type="submit" disabled={status.pending}>
       {status.pending ? "Saving…" : "Add Note"}
-    </button>
+    </Button>
   );
 }
 

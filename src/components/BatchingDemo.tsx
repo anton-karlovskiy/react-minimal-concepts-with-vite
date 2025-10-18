@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import Button from "./Button";
+
 /**
  * BatchingDemo - Demonstrates React 18's Automatic Batching
  * 
@@ -43,7 +45,7 @@ export default function BatchingDemo() {
       <p>This component has rendered <strong>{renders.current}</strong> times.</p>
       
       {/* Button triggers async state updates to demonstrate batching */}
-      <button onClick={updateOutsideEventLoop}>Increment A & B (batched)</button>
+      <Button onClick={updateOutsideEventLoop}>Increment A & B (batched)</Button>
       
       {/* Display current state values */}
       <p>A: {a} — B: {b}</p>
