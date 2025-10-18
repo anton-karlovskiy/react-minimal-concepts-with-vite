@@ -18,32 +18,32 @@ export default function App() {
         <h1>React 18/19 Minimal</h1>
         <small>Features: automatic batching, transitions, actions + optimistic UI, Redux vs Zustand, TanStack Query</small>
         <div className="space-y-6">
-          <div className="row">
-            <Card className="flex-1 min-w-[360px]">
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
               <h2>Automatic Batching</h2>
               <BatchingDemo />
             </Card>
-            <Card className="flex-1 min-w-[360px]">
+            <Card>
               <h2>Transitions</h2>
               <TransitionDemo />
             </Card>
           </div>
-          <div className="row">
-            <Card className="flex-1 min-w-[360px]">
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
               <h2>Redux Toolkit</h2>
               <ReduxDemo />
             </Card>
-            <Card className="flex-1 min-w-[360px]">
+            <Card>
               <h2>Zustand</h2>
               <ZustandDemo />
             </Card>
           </div>
-          <div className="row">
-            <Card className="flex-1 min-w-[360px]">
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
               <h2>useReducer</h2>
               <ReducerDemo />
             </Card>
-            <Card className="flex-1 min-w-[360px]">
+            <Card>
               <h2>Context</h2>
               <ContextDemo />
             </Card>
