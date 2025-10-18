@@ -3,6 +3,7 @@ import { useFormStatus } from "react-dom";
 import { useState } from "react";
 
 import Button from "./UI/Button";
+import Code from "./UI/Code";
 import Textarea from "./UI/Textarea";
 
 async function postNoteServerLike(data: { text: string }) {
@@ -47,8 +48,8 @@ export default function ActionsDemo() {
 
   return (
     <section>
-      <p>React 19 form <code>action</code> + <code>useActionState</code> + <code>useOptimistic</code> for instant UX.</p>
-      <form action={formAction} className={error ? "pending" : ""}>
+      <p>React 19 form <Code>action</Code> + <Code>useActionState</Code> + <Code>useOptimistic</Code> for instant UX.</p>
+      <form action={formAction} className={error ? "opacity-60" : ""}>
         <Textarea name="text" placeholder="Write a note…" rows={3} />
         <div style={{ marginTop: 8 }}>
           <SubmitStatus />
