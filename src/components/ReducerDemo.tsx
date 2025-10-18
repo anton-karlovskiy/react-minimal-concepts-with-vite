@@ -1,6 +1,7 @@
 import { useReducer } from "react";
 
 import Button from "./UI/Button";
+import Small from "./UI/Small";
 
 /**
  * ReducerDemo - Demonstrates useReducer Hook
@@ -52,11 +53,11 @@ export default function ReducerDemo() {
           +5
         </Button>
       </div>
-      <small>
+      <Small>
         useReducer provides predictable state updates through actions.
         <br />
         <strong>Try clicking the buttons to see centralized state management!</strong>
-      </small>
+      </Small>
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 
 import Button from "./UI/Button";
+import Small from "./UI/Small";
 
 /**
  * BatchingDemo - Demonstrates React 18's Automatic Batching
@@ -51,11 +52,11 @@ export default function BatchingDemo() {
       <p>A: {a} — B: {b}</p>
       
       {/* Key takeaway for learners */}
-      <small>
+      <Small>
         Automatic batching ensures a single render for multiple state updates in async callbacks.
         <br />
         <strong>Try clicking the button multiple times and watch the render count!</strong>
-      </small>
+      </Small>
     </section>
   );
 }

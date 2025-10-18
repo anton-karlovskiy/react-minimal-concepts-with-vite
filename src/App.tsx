@@ -9,6 +9,7 @@ import QueryDemo from "./components/QueryDemo";
 import ReducerDemo from "./components/ReducerDemo";
 import ContextDemo from "./components/ContextDemo";
 import Card from "./components/UI/Card";
+import Small from "./components/UI/Small";
 import { store } from "./state/store";
 
 export default function App() {
@@ -16,7 +17,7 @@ export default function App() {
     <Provider store={store}>
       <main>
         <h1>React 18/19 Minimal</h1>
-        <small>Features: automatic batching, transitions, actions + optimistic UI, Redux vs Zustand, TanStack Query</small>
+        <Small>Features: automatic batching, transitions, actions + optimistic UI, Redux vs Zustand, TanStack Query</Small>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <Card>
