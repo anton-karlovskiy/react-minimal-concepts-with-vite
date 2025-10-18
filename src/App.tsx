@@ -7,6 +7,7 @@ import ReduxDemo from "./components/ReduxDemo";
 import ZustandDemo from "./components/ZustandDemo";
 import QueryDemo from "./components/QueryDemo";
 import ReducerDemo from "./components/ReducerDemo";
+import ContextDemo from "./components/ContextDemo";
 import { store } from "./state/store";
 
 export default function App() {
@@ -40,6 +41,10 @@ export default function App() {
             <div className="card" style={{flex: "1 1 360px"}}>
               <h2>useReducer</h2>
               <ReducerDemo />
+            </div>
+            <div className="card" style={{flex: "1 1 360px"}}>
+              <h2>Context</h2>
+              <ContextDemo />
             </div>
           </div>
           <div className="card">
