@@ -42,8 +42,7 @@ export default function ReducerDemo() {
   return (
     <section>
       <p>Count: <strong>{state.count}</strong></p>
-      
-      <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+      <div className="space-x-2">
         <button onClick={() => dispatch({ type: "DECREMENT", payload: "5" })}>
           -5
         </button>
@@ -51,7 +50,6 @@ export default function ReducerDemo() {
           +5
         </button>
       </div>
-      
       <small>
         useReducer provides predictable state updates through actions.
         <br />

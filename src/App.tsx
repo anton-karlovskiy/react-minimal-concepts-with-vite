@@ -8,6 +8,7 @@ import ZustandDemo from "./components/ZustandDemo";
 import QueryDemo from "./components/QueryDemo";
 import ReducerDemo from "./components/ReducerDemo";
 import ContextDemo from "./components/ContextDemo";
+import Card from "./components/Card";
 import { store } from "./state/store";
 
 export default function App() {
@@ -18,43 +19,43 @@ export default function App() {
         <small>Features: automatic batching, transitions, actions + optimistic UI, Redux vs Zustand, TanStack Query</small>
         <div className="space-y-6">
           <div className="row">
-            <div className="card" style={{flex: "1 1 360px"}}>
+            <Card className="flex-1 min-w-[360px]">
               <h2>Automatic Batching</h2>
               <BatchingDemo />
-            </div>
-            <div className="card" style={{flex: "1 1 360px"}}>
+            </Card>
+            <Card className="flex-1 min-w-[360px]">
               <h2>Transitions</h2>
               <TransitionDemo />
-            </div>
+            </Card>
           </div>
           <div className="row">
-            <div className="card" style={{flex: "1 1 360px"}}>
+            <Card className="flex-1 min-w-[360px]">
               <h2>Redux Toolkit</h2>
               <ReduxDemo />
-            </div>
-            <div className="card" style={{flex: "1 1 360px"}}>
+            </Card>
+            <Card className="flex-1 min-w-[360px]">
               <h2>Zustand</h2>
               <ZustandDemo />
-            </div>
+            </Card>
           </div>
           <div className="row">
-            <div className="card" style={{flex: "1 1 360px"}}>
+            <Card className="flex-1 min-w-[360px]">
               <h2>useReducer</h2>
               <ReducerDemo />
-            </div>
-            <div className="card" style={{flex: "1 1 360px"}}>
+            </Card>
+            <Card className="flex-1 min-w-[360px]">
               <h2>Context</h2>
               <ContextDemo />
-            </div>
+            </Card>
           </div>
-          <div className="card">
+          <Card>
             <h2>TanStack Query</h2>
             <QueryDemo />
-          </div>
-          <div className="card">
+          </Card>
+          <Card>
             <h2>Actions + useOptimistic (React 19)</h2>
             <ActionsDemo />
-          </div>
+          </Card>
         </div>
       </main>
     </Provider>
