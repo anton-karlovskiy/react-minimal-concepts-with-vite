@@ -2,7 +2,7 @@ import { useActionState, useOptimistic } from "react";
 import { useFormStatus } from "react-dom";
 import { useState } from "react";
 
-import Button from "./Button";
+import Button from "./UI/Button";
 
 async function postNoteServerLike(data: { text: string }) {
   await new Promise(r => setTimeout(r, 900));

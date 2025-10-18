@@ -8,7 +8,7 @@ import ZustandDemo from "./components/ZustandDemo";
 import QueryDemo from "./components/QueryDemo";
 import ReducerDemo from "./components/ReducerDemo";
 import ContextDemo from "./components/ContextDemo";
-import Card from "./components/Card";
+import Card from "./components/UI/Card";
 import { store } from "./state/store";
 
 export default function App() {

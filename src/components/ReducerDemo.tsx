@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 
-import Button from "./Button";
+import Button from "./UI/Button";
 
 /**
  * ReducerDemo - Demonstrates useReducer Hook

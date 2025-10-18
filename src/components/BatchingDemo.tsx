@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import Button from "./Button";
+import Button from "./UI/Button";
 
 /**
  * BatchingDemo - Demonstrates React 18's Automatic Batching

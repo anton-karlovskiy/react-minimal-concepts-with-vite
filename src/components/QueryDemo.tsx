@@ -1,7 +1,7 @@
 import { useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-import Button from "./Button";
+import Button from "./UI/Button";
 
 const client = new QueryClient();
 
