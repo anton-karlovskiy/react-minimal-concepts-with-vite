@@ -21,11 +21,11 @@ import { useReducer } from "react";
 
 const initialState = { count: 0 };
 
-type ACTIONTYPE =
+type Action =
   | { type: "INCREMENT"; payload: number }
   | { type: "DECREMENT"; payload: string };
 
-function reducer(state: typeof initialState, action: ACTIONTYPE) {
+function reducer(state: typeof initialState, action: Action) {
   switch (action.type) {
     case "INCREMENT":
       return { count: state.count + action.payload };
