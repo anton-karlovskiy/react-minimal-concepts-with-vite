@@ -4,10 +4,6 @@ type Action = { type: 'INCREMENT'; payload: number } | { type: 'DECREMENT'; payl
 type Dispatch = (action: Action) => void;
 type State = { count: number };
 
-interface CountProviderProps {
-  children: ReactNode;
-}
-
 const CountContext = createContext<
   { state: State; dispatch: Dispatch; } | undefined
 >(undefined);
@@ -27,6 +23,10 @@ function countReducer(state: State, action: Action): State {
 }
 
 const initialState: State = { count: 0 };
+
+interface CountProviderProps {
+  children: ReactNode;
+}
 
 function CountProvider({ children }: CountProviderProps) {
   const [state, dispatch] = useReducer(countReducer, initialState);
