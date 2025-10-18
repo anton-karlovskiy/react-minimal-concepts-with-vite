@@ -1,37 +1,38 @@
 import { useMemo, useState, useTransition } from "react";
+
 import Input from "./UI/Input";
 import Code from "./UI/Code";
 
-const bigList = Array.from({length: 5000}, (_, i) => `Row ${i + 1}`);
+const bigList = Array.from({length: 5000}, (_, index) => `Row ${index + 1}`);
 
-export default function TransitionDemo() {
+function TransitionDemo() {
   const [query, setQuery] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase();
-    let result: string[] = [];
-    for (let i = 0; i < bigList.length; i++) {
-      const v = bigList[i];
-      if (v.toLowerCase().includes(q)) result.push(v);
-    }
-    return result;
+    return bigList.filter(item => item.toLowerCase().includes(query.toLowerCase()));
   }, [query]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+
+    startTransition(() => {
+      setQuery(value);
+    });
+  };
 
   return (
     <section>
       <p>Type to filter 5k rows. Input remains responsive thanks to <Code>startTransition</Code>.</p>
       <Input
         placeholder="Filter..."
-        onChange={(e) => {
-          const v = e.target.value;
-          startTransition(() => setQuery(v));
-        }}
-      />
-      {isPending && <p><em>Updating list…</em></p>}
-      <ul style={{ maxHeight: 200, overflow: "auto", marginTop: 8 }}>
-        {filtered.map((row) => <li key={row}>{row}</li>)}
+        onChange={handleChange} />
+      {isPending && <p className="opacity-60"><em>Updating list…</em></p>}
+      <ul className="max-h-[200px] overflow-auto">
+        {filtered.map(item => <li key={item}>{item}</li>)}
       </ul>
     </section>
   );
 }
+
+export default TransitionDemo;
