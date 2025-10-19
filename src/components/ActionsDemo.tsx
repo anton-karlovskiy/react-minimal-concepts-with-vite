@@ -97,22 +97,21 @@ function ActionsDemo() {
   const [error, formAction] = useActionState(addNote, null as string | null);
 
   return (
-    <section>
+    <section className="space-y-2">
       <p>React 19 <Code>{"<form action={...}>"}</Code> + <Code>useActionState</Code> (submit + error handling) + <Code>useFormStatus</Code> (pending state on the button) + <Code>useOptimistic</Code> (instant UI while the server works)</p>
       <form action={formAction} className={error ? "opacity-60" : ""}>
         <Textarea name="text" placeholder="Write a note…" rows={3} />
-        <div style={{ marginTop: 8 }}>
+        <div className="mt-2">
           <SubmitButton />
-          {error && <span style={{ marginLeft: 12, color: "#ffb3b3" }}>{error}</span>}
+          {error && <span className="ml-3 text-[#ffb3b3]">{error}</span>}
         </div>
       </form>
-
-      <ul style={{ marginTop: 12 }}>
+      <ul>
         {optimisticNotes.map(item => (
           <li key={item.id}>
             • {item.text}
             {String(item.id).startsWith("temp-") && (
-              <em style={{ opacity: 0.6, marginLeft: 8 }}> (saving…)</em>
+              <em className="opacity-60 ml-2"> (saving…)</em>
             )}
           </li>
         ))}

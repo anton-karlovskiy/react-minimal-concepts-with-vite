@@ -42,7 +42,7 @@ function TransitionDemo() {
   };
 
   return (
-    <section>
+    <section className="space-y-2">
       <p>Type to filter 5k rows. Input remains responsive thanks to <Code>startTransition</Code>.</p>
       <Input
         placeholder="Filter..."

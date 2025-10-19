@@ -43,7 +43,7 @@ export default function ReducerDemo() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
-    <section>
+    <section className="space-y-2">
       <p>Count: <strong>{state.count}</strong></p>
       <div className="space-x-2">
         <Button onClick={() => dispatch({ type: "DECREMENT", payload: "5" })}>

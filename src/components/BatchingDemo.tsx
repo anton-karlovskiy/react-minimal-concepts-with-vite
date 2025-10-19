@@ -41,16 +41,13 @@ export default function BatchingDemo() {
   }
 
   return (
-    <section>
+    <section className="space-y-2">
       {/* Render counter helps visualize the batching effect */}
       <p>This component has rendered <strong>{renders.current}</strong> times.</p>
-      
       {/* Button triggers async state updates to demonstrate batching */}
       <Button onClick={updateOutsideEventLoop}>Increment A & B (batched)</Button>
-      
       {/* Display current state values */}
       <p>A: {a} — B: {b}</p>
-      
       {/* Key takeaway for learners */}
       <Small>
         Automatic batching ensures a single render for multiple state updates in async callbacks.

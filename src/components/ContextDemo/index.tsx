@@ -4,8 +4,10 @@ import { CountProvider } from "./count-context";
 function ContextDemo() {
   return (
     <CountProvider>
-      <CountDisplay />
-      <Counter />
+      <section className="space-y-2">
+        <CountDisplay />
+        <Counter />
+      </section>
     </CountProvider>
   );
 }
