@@ -8,6 +8,7 @@ import ZustandDemo from "./components/ZustandDemo";
 import QueryDemo from "./components/QueryDemo";
 import ReducerDemo from "./components/ReducerDemo";
 import ContextDemo from "./components/ContextDemo";
+import UseDemo from "./components/UseDemo";
 import Card from "./components/UI/Card";
 import Small from "./components/UI/Small";
 import DemoTitle from "./components/UI/DemoTitle";
@@ -57,6 +58,10 @@ export default function App() {
           <Card>
             <DemoTitle>Actions + useOptimistic (React 19)</DemoTitle>
             <ActionsDemo />
+          </Card>
+          <Card>
+            <DemoTitle>use Hook + Suspense (React 19)</DemoTitle>
+            <UseDemo />
           </Card>
         </div>
       </main>
