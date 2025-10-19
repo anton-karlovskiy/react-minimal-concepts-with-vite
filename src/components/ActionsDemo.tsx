@@ -6,15 +6,26 @@ import Button from "./UI/Button";
 import Code from "./UI/Code";
 import Textarea from "./UI/Textarea";
 
-async function postNoteServerLike(data: { text: string }) {
+interface Note {
+  id: string;
+  text: string;
+}
+
+async function postNoteServerLike(data: { text: string }): Promise<Note> {
+  // Simulate latency
   await new Promise(r => setTimeout(r, 900));
+  // Random failure to demonstrate error handling/rollback
   if (Math.random() < 0.2) {
     throw new Error("Random failure – please retry");
   }
-  return { id: Math.random().toString(36).slice(2), ...data };
+  return {
+    id: Math.random().toString(36).slice(2),
+    ...data
+  };
 }
 
-function SubmitStatus() {
+// Submit button that knows when the form is pending
+function SubmitButton() {
   const status = useFormStatus();
   return (
     <Button type="submit" disabled={status.pending}>
@@ -23,45 +34,71 @@ function SubmitStatus() {
   );
 }
 
-export default function ActionsDemo() {
-  const [notes, setNotes] = useState<{id: string, text: string}[]>([]);
-  const [optimisticNotes, addOptimisticNote] = useOptimistic(notes, (state, newItem: {id: string, text: string}) => {
-    return [...state, newItem];
-  });
+function ActionsDemo() {
+  const [notes, setNotes] = useState<Note[]>([]);
 
-  async function addNote(prevState: string | null, formData: FormData) {
+  // Optimistic list that updates instantly while server is pending
+  const [optimisticNotes, addOptimisticNote] = useOptimistic(
+    notes,
+    (state, newItem: Note) => {
+      return [...state, newItem];
+    }
+  );
+
+  // The action that the <form> will call
+  async function addNote(
+    prevState: string | null,
+    formData: FormData
+  ): Promise<string | null> {
     const text = String(formData.get("text") || "").trim();
     if (!text) return "Please enter some text";
-    const tempId = "temp-" + Date.now();
-    addOptimisticNote({ id: tempId, text });
+
+    // 1) optimistic add
+    const temp: Note = {
+      id: "temp-" + Date.now(),
+      text
+    };
+    addOptimisticNote(temp);
 
     try {
+      // 2) “server” call
       const saved = await postNoteServerLike({ text });
-      setNotes((list) => [...list, saved]);
-      return null;
-    } catch (e: any) {
-      return e?.message || "Failed to save";
+      // 3) reconcile success with real state
+      setNotes((prev) => [...prev, saved]);
+      return null; // no error
+    } catch (error: any) {
+      // No need to explicitly remove optimistic item:
+      // optimistic list is derived from `notes`, which we only update on success.
+      return error?.message || "Failed to save";
     }
   }
 
+  // Bind the action to the form & expose last error message (if any)
   const [error, formAction] = useActionState(addNote, null as string | null);
 
   return (
     <section>
-      <p>React 19 form <Code>action</Code> + <Code>useActionState</Code> + <Code>useOptimistic</Code> for instant UX.</p>
+      <p>React 19 <Code>{"<form action={...}>"}</Code> + <Code>useActionState</Code> (submit + error handling) + <Code>useFormStatus</Code> (pending state on the button) + <Code>useOptimistic</Code> (instant UI while the server works)</p>
       <form action={formAction} className={error ? "opacity-60" : ""}>
         <Textarea name="text" placeholder="Write a note…" rows={3} />
         <div style={{ marginTop: 8 }}>
-          <SubmitStatus />
+          <SubmitButton />
           {error && <span style={{ marginLeft: 12, color: "#ffb3b3" }}>{error}</span>}
         </div>
       </form>
 
       <ul style={{ marginTop: 12 }}>
-        {optimisticNotes.map(n => (
-          <li key={n.id}>• {n.text}</li>
+        {optimisticNotes.map(item => (
+          <li key={item.id}>
+            • {item.text}
+            {String(item.id).startsWith("temp-") && (
+              <em style={{ opacity: 0.6, marginLeft: 8 }}> (saving…)</em>
+            )}
+          </li>
         ))}
       </ul>
     </section>
   );
 }
+
+export default ActionsDemo;
