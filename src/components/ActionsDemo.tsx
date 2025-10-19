@@ -6,6 +6,26 @@ import Button from "./UI/Button";
 import Code from "./UI/Code";
 import Textarea from "./UI/Textarea";
 
+/**
+ * ActionsDemo - Demonstrates React 19 Actions and Optimistic Updates
+ * 
+ * KEY CONCEPTS:
+ * 1. useActionState: Server actions with built-in state management
+ *    - Handles form submissions with automatic loading states
+ *    - Provides error handling and success states
+ *    - Integrates seamlessly with server-side form processing
+ * 
+ * 2. useOptimistic: Instant UI updates with automatic rollback
+ *    - Shows optimistic updates immediately for better UX
+ *    - Automatically reverts on server errors
+ *    - Maintains UI consistency during async operations
+ * 
+ * 3. useFormStatus: Access form state from child components
+ *    - Submit buttons can access pending state
+ *    - Enables proper loading indicators
+ *    - Works with server actions and form submissions
+ */
+
 interface Note {
   id: string;
   text: string;
