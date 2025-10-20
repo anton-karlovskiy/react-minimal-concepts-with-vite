@@ -7,7 +7,7 @@ A tiny Vite + React + TypeScript app showcasing:
 - **Redux Toolkit** vs **Zustand** global state
 - **TanStack Query** server cache
 
-## Prereqs
+## Prerequisites
 - Node 18+
 
 ## Quickstart
