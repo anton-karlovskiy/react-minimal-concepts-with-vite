@@ -24,6 +24,7 @@ Learn and compare modern React concepts in a tiny, fast Vite + TypeScript playgr
 - **useReducer**: predictable local state with action-based updates.
 - **Context**: component tree state sharing with providers.
 - **TanStack Query**: request caching, refetching, and status management with simulated latency.
+- **Text Summarization**: AI-powered text summarization with model selection and progress tracking.
 
 ## Tech stack
 - React, React DOM
@@ -56,6 +57,7 @@ pnpm build && pnpm preview
 - **Context**: provider pattern for sharing state across component tree.
 - **TanStack Query**: fake API with latency, caching, refetch.
 - **Actions + useOptimistic**: optimistic note submit with error messaging.
+- **Text Summarization**: model selection, download progress, and AI-powered summarization.
 
 ## Project structure
 ```
@@ -69,6 +71,7 @@ src/
     QueryDemo.tsx           # TanStack Query example
     ReducerDemo.tsx         # useReducer example
     ContextDemo/            # Context + provider pattern
+    SummarizerDemo.tsx      # Text summarization demo
   state/                    # redux store + zustand store
   main.tsx, App.tsx
 ```
