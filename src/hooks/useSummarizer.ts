@@ -6,35 +6,31 @@ env.allowLocalModels = false;
 
 // ninja focus touch <<
 interface SummarizationModel {
-  id: string;
   name: string;
   size: string;
   description: string;
-  modelName: string;
+  source: string;
 }
 // ninja focus touch >>
 
 const SUMMARIZATION_MODELS: SummarizationModel[] = [
   {
-    id: "bart-large-cnn",
     name: "BART Large CNN",
     size: "1.6GB",
     description: "High-quality abstractive summarization",
-    modelName: "Xenova/bart-large-cnn"
+    source: "Xenova/bart-large-cnn"
   },
   {
-    id: "t5-small",
     name: "T5 Small",
     size: "60MB",
     description: "Text-to-text transfer transformer",
-    modelName: "Xenova/t5-small"
+    source: "Xenova/t5-small"
   },
   {
-    id: "pegasus-xsum",
     name: "PEGASUS XSum",
     size: "2.2GB",
     description: "Extreme summarization model",
-    modelName: "Xenova/pegasus-xsum"
+    source: "Xenova/pegasus-xsum"
   }
 ];
 
@@ -62,7 +58,7 @@ interface ModelState {
 interface UseSummarizerReturn {
   state: SummarizationState;
   modelState: ModelState | undefined;
-  summarize: (text: string, modelId: string) => Promise<void>;
+  summarize: (text: string, modelSource: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -89,14 +85,9 @@ function useSummarizer(): UseSummarizerReturn {
     currentModelRef.current = null;
   }, []);
 
-  const loadModel = useCallback(async (modelId: string): Promise<SummarizationPipeline | undefined> => {
-    const model = SUMMARIZATION_MODELS.find(item => item.id === modelId);
-    if (!model) {
-      throw new Error(`Model ${modelId} not found`);
-    }
-
+  const loadModel = useCallback(async (modelSource: string): Promise<SummarizationPipeline | undefined> => {
     // If the same model is already loaded, return the existing pipeline
-    if (pipelineRef.current && currentModelRef.current === modelId) {
+    if (pipelineRef.current && currentModelRef.current === modelSource) {
       return pipelineRef.current;
     }
 
@@ -112,12 +103,12 @@ function useSummarizer(): UseSummarizerReturn {
       }));
 
       // Load the pipeline with progress tracking
-      const generator = await pipeline("summarization", model.modelName, {
+      const generator = await pipeline("summarization", modelSource, {
         progress_callback: progressCallback
       });
 
       pipelineRef.current = generator;
-      currentModelRef.current = modelId;
+      currentModelRef.current = modelSource;
 
       setState(prev => ({
         ...prev,
@@ -166,9 +157,9 @@ function useSummarizer(): UseSummarizerReturn {
     }
   }, []);
 
-  const summarize = useCallback(async (text: string, modelId: string): Promise<void> => {
+  const summarize = useCallback(async (text: string, modelSource: string): Promise<void> => {
     // Load the model if needed
-    const summarizer = await loadModel(modelId);
+    const summarizer = await loadModel(modelSource);
     if (!summarizer) {
       return;
     }
@@ -186,6 +177,7 @@ function useSummarizer(): UseSummarizerReturn {
 
 export {
   SummarizationStatus,
-  SUMMARIZATION_MODELS,
-  useSummarizer
+  SUMMARIZATION_MODELS
 };
+
+export default useSummarizer;

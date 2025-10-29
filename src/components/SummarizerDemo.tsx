@@ -7,9 +7,7 @@ import useSummarizer, { SummarizationStatus, SUMMARIZATION_MODELS } from "../hoo
 
 function SummarizerDemo() {
   const [text, setText] = useState("");
-  // ninja focus touch <<
-  const [selectedModel, setSelectedModel] = useState(SUMMARIZATION_MODELS[0].id);
-  // ninja focus touch >>
+  const [selectedModelSource, setSelectedModelSource] = useState(SUMMARIZATION_MODELS[0].source);
 
   const { state, summarize, reset, modelState } = useSummarizer();
 
@@ -19,15 +17,15 @@ function SummarizerDemo() {
       return;
     }
 
-    await summarize(text, selectedModel);
-  }, [text, selectedModel, summarize]);
+    await summarize(text, selectedModelSource);
+  }, [text, selectedModelSource, summarize]);
 
-  const handleModelChange = useCallback((modelId: string) => {
-    setSelectedModel(modelId);
+  const handleModelChange = useCallback((modelSource: string) => {
+    setSelectedModelSource(modelSource);
     reset(); // Reset the summarizer state when model changes
   }, [reset]);
-
-  const selectedModelInfo = SUMMARIZATION_MODELS.find(item => item.id === selectedModel);
+  
+  const selectedModel = SUMMARIZATION_MODELS.find(item => item.source === selectedModelSource);
 
   const summarizeButtonCaption = (() => {
     switch (state.status) {
@@ -39,6 +37,9 @@ function SummarizerDemo() {
         return "Summarize";
     }
   })();
+
+  console.log("state.status =>", state.status);
+  console.log("summarizeButtonCaption =>", summarizeButtonCaption);
 
   return (
     <div className="space-y-4">
@@ -58,15 +59,13 @@ function SummarizerDemo() {
           Summarization Model
         </label>
         <Select
-          value={selectedModel}
+          value={selectedModelSource}
           onChange={event => handleModelChange(event.target.value)}>
-          {/* ninja focus touch << */}
           {SUMMARIZATION_MODELS.map(item => (
-            <option key={item.id} value={item.id}>
+            <option key={item.source} value={item.source}>
               {item.name} ({item.size}) - {item.description}
             </option>
           ))}
-          {/* ninja focus touch >> */}
         </Select>
       </div>
 
@@ -107,9 +106,9 @@ function SummarizerDemo() {
           <p className="p-3 bg-[#1a1d23] border border-[#2b2e35] rounded-lg text-[#f5f7fb]">
             {state.summary}
           </p>
-          {selectedModelInfo && (
+          {selectedModel && (
             <p className="text-xs text-gray-400 mt-2">
-              Generated using {selectedModelInfo.name} ({selectedModelInfo.size})
+              Generated using {selectedModel.name} ({selectedModel.size})
             </p>
           )}
         </div>
