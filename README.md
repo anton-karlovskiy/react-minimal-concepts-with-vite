@@ -25,6 +25,7 @@ Learn and compare modern React concepts in a tiny, fast Vite + TypeScript playgr
 - **Context**: component tree state sharing with providers.
 - **TanStack Query**: request caching, refetching, and status management with simulated latency.
 - **Text Summarization**: AI-powered text summarization with model selection and progress tracking.
+ - **Loading states with status enum**: replace `isLoading` booleans with an explicit status.
 
 ## Tech stack
 - React, React DOM
@@ -58,6 +59,7 @@ pnpm build && pnpm preview
 - **TanStack Query**: fake API with latency, caching, refetch.
 - **Actions + useOptimistic**: optimistic note submit with error messaging.
 - **Text Summarization**: model selection, download progress, and AI-powered summarization.
+ - **Loading States (status enum)**: idle/pending/resolved/rejected vs `isLoading` boolean.
 
 ## Project structure
 ```
@@ -72,6 +74,7 @@ src/
     ReducerDemo.tsx         # useReducer example
     ContextDemo/            # Context + provider pattern
     SummarizerDemo.tsx      # Text summarization demo
+    LoadingDemo.tsx         # Status enum over isLoading booleans
   state/                    # redux store + zustand store
   main.tsx, App.tsx
 ```
@@ -91,6 +94,7 @@ src/
 - Zustand: https://github.com/pmndrs/zustand
 - TanStack Query: https://tanstack.com/query/latest
 - Vite: https://vitejs.dev
+- Stop using isLoading booleans (Kent C. Dodds): https://kentcdodds.com/blog/stop-using-isloading-booleans
 
 ## SEO keywords (for discoverability)
 React actions, useActionState, useFormStatus, useOptimistic, React transitions, startTransition, automatic batching, Redux Toolkit vs Zustand, useReducer, React Context, TanStack React Query, Vite React TypeScript starter, React features, optimistic UI example, React state management comparison, minimal React concepts demo

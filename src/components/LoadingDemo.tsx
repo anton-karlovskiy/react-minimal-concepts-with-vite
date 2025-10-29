@@ -1,5 +1,21 @@
 import * as React from "react";
 
+/**
+ * LoadingDemo - Status enum over isLoading booleans
+ *
+ * KEY CONCEPTS:
+ * 1. Replace isLoading-style booleans with a single finite "status" value
+ *    - Avoids impossible states (e.g., loading + error + data at once)
+ *    - Makes UI rendering unambiguous (idle | pending | resolved | rejected)
+ *
+ * 2. Reducer-driven state transitions
+ *    - Actions move the state machine between finite states
+ *    - Keeps error/position updates consistent with the current status
+ *
+ * 3. Based on Kent C. Dodds' article: Stop using isLoading booleans
+ *    - See: https://kentcdodds.com/blog/stop-using-isloading-booleans
+ */
+
 interface GeoPositionState {
   status: 'idle' | 'pending' | 'resolved' | 'rejected';
   position: GeolocationPosition | null;

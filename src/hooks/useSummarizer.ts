@@ -4,14 +4,12 @@ import { pipeline, SummarizationPipeline, env, SummarizationSingle } from "@xeno
 // Disable local models
 env.allowLocalModels = false;
 
-// ninja focus touch <<
 interface SummarizationModel {
   name: string;
   size: string;
   description: string;
   source: string;
 }
-// ninja focus touch >>
 
 const SUMMARIZATION_MODELS: SummarizationModel[] = [
   {
