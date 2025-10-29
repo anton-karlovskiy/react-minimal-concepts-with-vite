@@ -8,9 +8,8 @@ import ZustandDemo from "./components/ZustandDemo";
 import QueryDemo from "./components/QueryDemo";
 import ReducerDemo from "./components/ReducerDemo";
 import ContextDemo from "./components/ContextDemo";
-// ninja focus touch <
 import SummarizerDemo from "./components/SummarizerDemo";
-// ninja focus touch >
+import LoadingDemo from "./components/LoadingDemo";
 import Card from "./components/UI/Card";
 import Small from "./components/UI/Small";
 import DemoTitle from "./components/UI/DemoTitle";
@@ -61,12 +60,14 @@ export default function App() {
             <DemoTitle>Actions + useOptimistic</DemoTitle>
             <ActionsDemo />
           </Card>
-          {/* ninja focus touch < */}
           <Card>
             <DemoTitle>Text Summarization</DemoTitle>
             <SummarizerDemo />
           </Card>
-          {/* ninja focus touch > */}
+          <Card>
+            <DemoTitle>Stop using isLoading booleans</DemoTitle>
+            <LoadingDemo />
+          </Card>
         </div>
       </main>
     </Provider>
