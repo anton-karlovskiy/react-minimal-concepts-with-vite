@@ -1,5 +1,4 @@
-// ninja focus touch <
-interface SelectProps extends React.ComponentPropsWithRef<'select'> {
+interface SelectProps extends React.ComponentPropsWithRef<"select"> {
   className?: string;
 }
 
@@ -14,4 +13,3 @@ function Select({ className = "", children, ...rest }: SelectProps) {
 }
 
 export default Select;
-// ninja focus touch >

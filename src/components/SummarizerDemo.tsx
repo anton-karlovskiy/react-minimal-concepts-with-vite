@@ -1,13 +1,12 @@
-// ninja focus touch <
-import { useState, useCallback } from 'react';
-import Button from './UI/Button';
-import Textarea from './UI/Textarea';
-import Select from './UI/Select';
-import ProgressBar from './UI/ProgressBar';
-import { useSummarizer, SUMMARIZATION_MODELS, SummarizationStatus } from '../hooks/useSummarizer';
+import { useState, useCallback } from "react";
+import Button from "./UI/Button";
+import Textarea from "./UI/Textarea";
+import Select from "./UI/Select";
+import ProgressBar from "./UI/ProgressBar";
+import useSummarizer, { SummarizationStatus, SUMMARIZATION_MODELS } from "../hooks/useSummarizer";
 
 function SummarizerDemo() {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   // ninja focus touch <<
   const [selectedModel, setSelectedModel] = useState(SUMMARIZATION_MODELS[0].id);
   // ninja focus touch >>
@@ -16,7 +15,7 @@ function SummarizerDemo() {
 
   const handleSummarize = useCallback(async () => {
     if (!text.trim()) {
-      console.log('Text is empty');
+      console.log("Text is empty");
       return;
     }
 
@@ -30,18 +29,16 @@ function SummarizerDemo() {
 
   const selectedModelInfo = SUMMARIZATION_MODELS.find(item => item.id === selectedModel);
 
-  console.log('ninja focus touch: state.status =>', state.status);
   const summarizeButtonCaption = (() => {
     switch (state.status) {
       case SummarizationStatus.ModelPending:
-        return 'Downloading Model...';
+        return "Downloading Model...";
       case SummarizationStatus.SummaryPending:
-        return 'Summarizing...';
+        return "Summarizing...";
       default:
-        return 'Summarize';
+        return "Summarize";
     }
   })();
-  console.log('ninja focus touch: summarizeButtonCaption =>', summarizeButtonCaption);
 
   return (
     <div className="space-y-4">
@@ -78,12 +75,14 @@ function SummarizerDemo() {
           <label className="block text-sm font-medium mb-2">
             Downloading Model...
           </label>
-          {/* ninja focus touch << */}
-          <ProgressBar progress={modelState.progress ?? 0} />
-          <p className="text-xs text-gray-400 mt-1">
-            {modelState.status} {modelState.progress ?? 0}% complete
-          </p>
-          {/* ninja focus touch >> */}
+          {modelState.progress && (
+            <>
+              <ProgressBar progress={modelState.progress} />
+              <p className="text-xs text-gray-400 mt-1">
+                {modelState.status} {modelState.progress}% complete
+              </p>
+            </>  
+          )}
         </div>
       )}
 
@@ -120,4 +119,3 @@ function SummarizerDemo() {
 }
 
 export default SummarizerDemo;
-// ninja focus touch >

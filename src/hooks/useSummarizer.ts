@@ -1,6 +1,5 @@
-// ninja focus touch <
-import { useState, useCallback, useRef } from 'react';
-import { pipeline, SummarizationPipeline, env, SummarizationSingle } from '@xenova/transformers';
+import { useState, useCallback, useRef } from "react";
+import { pipeline, SummarizationPipeline, env, SummarizationSingle } from "@xenova/transformers";
 
 // Disable local models
 env.allowLocalModels = false;
@@ -17,36 +16,36 @@ interface SummarizationModel {
 
 const SUMMARIZATION_MODELS: SummarizationModel[] = [
   {
-    id: 'bart-large-cnn',
-    name: 'BART Large CNN',
-    size: '1.6GB',
-    description: 'High-quality abstractive summarization',
-    modelName: 'Xenova/bart-large-cnn'
+    id: "bart-large-cnn",
+    name: "BART Large CNN",
+    size: "1.6GB",
+    description: "High-quality abstractive summarization",
+    modelName: "Xenova/bart-large-cnn"
   },
   {
-    id: 't5-small',
-    name: 'T5 Small',
-    size: '60MB',
-    description: 'Text-to-text transfer transformer',
-    modelName: 'Xenova/t5-small'
+    id: "t5-small",
+    name: "T5 Small",
+    size: "60MB",
+    description: "Text-to-text transfer transformer",
+    modelName: "Xenova/t5-small"
   },
   {
-    id: 'pegasus-xsum',
-    name: 'PEGASUS XSum',
-    size: '2.2GB',
-    description: 'Extreme summarization model',
-    modelName: 'Xenova/pegasus-xsum'
+    id: "pegasus-xsum",
+    name: "PEGASUS XSum",
+    size: "2.2GB",
+    description: "Extreme summarization model",
+    modelName: "Xenova/pegasus-xsum"
   }
 ];
 
 enum SummarizationStatus {
-  Idle = 'IDLE',
-  ModelPending = 'MODEL_PENDING',
-  SummaryPending = 'SUMMARY_PENDING',
-  ModelResolved = 'MODEL_RESOLVED',
-  ModelRejected = 'MODEL_REJECTED',
-  SummaryResolved = 'SUMMARY_RESOLVED',
-  SummaryRejected = 'SUMMARY_REJECTED'
+  Idle = "IDLE",
+  ModelPending = "MODEL_PENDING",
+  SummaryPending = "SUMMARY_PENDING",
+  ModelResolved = "MODEL_RESOLVED",
+  ModelRejected = "MODEL_REJECTED",
+  SummaryResolved = "SUMMARY_RESOLVED",
+  SummaryRejected = "SUMMARY_REJECTED"
 }
 
 interface SummarizationState {
@@ -76,12 +75,18 @@ function useSummarizer(): UseSummarizerReturn {
 
   const [modelState, setModelState] = useState<ModelState>();
 
+  const pipelineRef = useRef<SummarizationPipeline | null>(null);
+  const currentModelRef = useRef<string | null>(null);
+
   const reset = useCallback(() => {
     setState({
       status: SummarizationStatus.Idle,
       summary: null,
       error: null
     });
+
+    pipelineRef.current = null;
+    currentModelRef.current = null;
   }, []);
 
   const loadModel = useCallback(async (modelId: string): Promise<SummarizationPipeline | undefined> => {
@@ -90,35 +95,41 @@ function useSummarizer(): UseSummarizerReturn {
       throw new Error(`Model ${modelId} not found`);
     }
 
+    // If the same model is already loaded, return the existing pipeline
+    if (pipelineRef.current && currentModelRef.current === modelId) {
+      return pipelineRef.current;
+    }
+
     try {
       // Create a progress callback to track download progress
       const progressCallback = (newModelState: ModelState) => {
         setModelState(newModelState);
       };
       
-      console.log('ninja focus touch: before model.modelName =>', model.modelName);
-
       setState(prev => ({
         ...prev,
         status: SummarizationStatus.ModelPending
       }));
 
       // Load the pipeline with progress tracking
-      const summarizationPipeline = await pipeline('summarization', model.modelName, {
+      const generator = await pipeline("summarization", model.modelName, {
         progress_callback: progressCallback
       });
+
+      pipelineRef.current = generator;
+      currentModelRef.current = modelId;
 
       setState(prev => ({
         ...prev,
         status: SummarizationStatus.ModelResolved
       }));
 
-      return summarizationPipeline;
+      return generator;
     } catch (error) {
       setState(prev => ({
         ...prev,
         status: SummarizationStatus.ModelRejected,
-        error: new Error(`Failed to load model: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        error: new Error(`Failed to load model: ${error instanceof Error ? error.message : "Unknown error"}`)
       }));
     }
   }, []);
@@ -126,7 +137,7 @@ function useSummarizer(): UseSummarizerReturn {
   const generateSummary = useCallback(async (text: string, summarizer: SummarizationPipeline): Promise<void> => {
     try {
       if (!text.trim()) {
-        throw new Error('Please enter some text to summarize.');
+        throw new Error("Please enter some text to summarize.");
       }
       
       setState(prev => ({
@@ -144,13 +155,13 @@ function useSummarizer(): UseSummarizerReturn {
       setState(prev => ({
         ...prev,
         status: SummarizationStatus.SummaryResolved,
-        summary: (output[0] as unknown as SummarizationSingle).summary_text || 'Unable to generate summary from the provided text.'
+        summary: (output[0] as unknown as SummarizationSingle).summary_text || "Unable to generate summary from the provided text."
       }));
     } catch (error) {
       setState(prev => ({
         ...prev,
         status: SummarizationStatus.SummaryRejected,
-        error: new Error(`Failed to summarize text: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        error: new Error(`Failed to summarize text: ${error instanceof Error ? error.message : "Unknown error"}`)
       }));
     }
   }, []);
@@ -178,4 +189,3 @@ export {
   SUMMARIZATION_MODELS,
   useSummarizer
 };
-// ninja focus touch >

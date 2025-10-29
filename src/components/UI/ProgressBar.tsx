@@ -1,4 +1,3 @@
-// ninja focus touch <
 interface ProgressBarProps {
   progress: number; // 0-100
   className?: string;
@@ -15,4 +14,3 @@ function ProgressBar({ progress, className = "" }: ProgressBarProps) {
 }
 
 export default ProgressBar;
-// ninja focus touch >
