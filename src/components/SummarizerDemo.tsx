@@ -4,16 +4,19 @@ import Button from './UI/Button';
 import Textarea from './UI/Textarea';
 import Select from './UI/Select';
 import ProgressBar from './UI/ProgressBar';
-import { useSummarizer, SUMMARIZATION_MODELS } from '../hooks/useSummarizer';
+import { useSummarizer, SUMMARIZATION_MODELS, SummarizationStatus } from '../hooks/useSummarizer';
 
-export default function SummarizerDemo() {
+function SummarizerDemo() {
   const [text, setText] = useState('');
+  // ninja focus touch <<
   const [selectedModel, setSelectedModel] = useState(SUMMARIZATION_MODELS[0].id);
-  
-  const { state, summarize, reset } = useSummarizer();
+  // ninja focus touch >>
+
+  const { state, summarize, reset, modelState } = useSummarizer();
 
   const handleSummarize = useCallback(async () => {
     if (!text.trim()) {
+      console.log('Text is empty');
       return;
     }
 
@@ -25,7 +28,20 @@ export default function SummarizerDemo() {
     reset(); // Reset the summarizer state when model changes
   }, [reset]);
 
-  const selectedModelInfo = SUMMARIZATION_MODELS.find(m => m.id === selectedModel);
+  const selectedModelInfo = SUMMARIZATION_MODELS.find(item => item.id === selectedModel);
+
+  console.log('ninja focus touch: state.status =>', state.status);
+  const summarizeButtonCaption = (() => {
+    switch (state.status) {
+      case SummarizationStatus.ModelPending:
+        return 'Downloading Model...';
+      case SummarizationStatus.SummaryPending:
+        return 'Summarizing...';
+      default:
+        return 'Summarize';
+    }
+  })();
+  console.log('ninja focus touch: summarizeButtonCaption =>', summarizeButtonCaption);
 
   return (
     <div className="space-y-4">
@@ -35,10 +51,9 @@ export default function SummarizerDemo() {
         </label>
         <Textarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={event => setText(event.target.value)}
           placeholder="Enter the text you want to summarize..."
-          rows={6}
-        />
+          rows={6} />
       </div>
 
       <div>
@@ -47,48 +62,45 @@ export default function SummarizerDemo() {
         </label>
         <Select
           value={selectedModel}
-          onChange={(e) => handleModelChange(e.target.value)}
-        >
-          {SUMMARIZATION_MODELS.map(model => (
-            <option key={model.id} value={model.id}>
-              {model.name} ({model.size}) - {model.description}
+          onChange={event => handleModelChange(event.target.value)}>
+          {/* ninja focus touch << */}
+          {SUMMARIZATION_MODELS.map(item => (
+            <option key={item.id} value={item.id}>
+              {item.name} ({item.size}) - {item.description}
             </option>
           ))}
+          {/* ninja focus touch >> */}
         </Select>
       </div>
 
-      {state.isDownloading && (
+      {state.status === SummarizationStatus.ModelPending && modelState && (
         <div>
           <label className="block text-sm font-medium mb-2">
             Downloading Model...
           </label>
-          <ProgressBar progress={state.downloadProgress} />
+          {/* ninja focus touch << */}
+          <ProgressBar progress={modelState.progress ?? 0} />
           <p className="text-xs text-gray-400 mt-1">
-            {state.downloadProgress}% complete
+            {modelState.status} {modelState.progress ?? 0}% complete
           </p>
+          {/* ninja focus touch >> */}
         </div>
       )}
 
       <Button
         onClick={handleSummarize}
-        disabled={state.isDownloading || state.isSummarizing || !text.trim()}
-        className="w-full"
-      >
-        {state.isDownloading 
-          ? 'Downloading Model...' 
-          : state.isSummarizing 
-          ? 'Summarizing...' 
-          : 'Summarize'
-        }
+        disabled={state.status === SummarizationStatus.ModelPending || state.status === SummarizationStatus.SummaryPending || !text.trim()}
+        className="w-full">
+        {summarizeButtonCaption}
       </Button>
 
-      {state.error && (
+      {state.status === SummarizationStatus.ModelRejected || state.status === SummarizationStatus.SummaryRejected && state.error && (
         <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-300 text-sm">
-          {state.error}
+          {state.error.message}
         </div>
       )}
 
-      {state.summary && (
+      {state.status === SummarizationStatus.SummaryResolved && state.summary !== null && (
         <div>
           <label className="block text-sm font-medium mb-2">
             Summary
@@ -106,4 +118,6 @@ export default function SummarizerDemo() {
     </div>
   );
 }
+
+export default SummarizerDemo;
 // ninja focus touch >

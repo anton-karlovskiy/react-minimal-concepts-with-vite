@@ -1,23 +1,21 @@
 // ninja focus touch <
 import { useState, useCallback, useRef } from 'react';
-import { pipeline, SummarizationPipeline } from '@xenova/transformers';
+import { pipeline, SummarizationPipeline, env, SummarizationSingle } from '@xenova/transformers';
 
-export interface SummarizationModel {
+// Disable local models
+env.allowLocalModels = false;
+
+// ninja focus touch <<
+interface SummarizationModel {
   id: string;
   name: string;
   size: string;
   description: string;
   modelName: string;
 }
+// ninja focus touch >>
 
-export const SUMMARIZATION_MODELS: SummarizationModel[] = [
-  {
-    id: 'distilbert-base-uncased',
-    name: 'DistilBERT Base',
-    size: '67MB',
-    description: 'Fast and efficient for general text summarization',
-    modelName: 'Xenova/distilbert-base-uncased'
-  },
+const SUMMARIZATION_MODELS: SummarizationModel[] = [
   {
     id: 'bart-large-cnn',
     name: 'BART Large CNN',
@@ -41,125 +39,103 @@ export const SUMMARIZATION_MODELS: SummarizationModel[] = [
   }
 ];
 
-export interface SummarizationState {
-  isDownloading: boolean;
-  downloadProgress: number;
-  isSummarizing: boolean;
-  summary: string;
-  error: string | null;
-  isModelLoaded: boolean;
+enum SummarizationStatus {
+  Idle = 'IDLE',
+  ModelPending = 'MODEL_PENDING',
+  SummaryPending = 'SUMMARY_PENDING',
+  ModelResolved = 'MODEL_RESOLVED',
+  ModelRejected = 'MODEL_REJECTED',
+  SummaryResolved = 'SUMMARY_RESOLVED',
+  SummaryRejected = 'SUMMARY_REJECTED'
 }
 
-export interface UseSummarizerReturn {
+interface SummarizationState {
+  status: SummarizationStatus;
+  summary: string | null;
+  error: Error | null;
+}
+
+interface ModelState {
+  status: string;
+  progress?: number;
+}
+
+interface UseSummarizerReturn {
   state: SummarizationState;
+  modelState: ModelState | undefined;
   summarize: (text: string, modelId: string) => Promise<void>;
   reset: () => void;
 }
 
-export function useSummarizer(): UseSummarizerReturn {
+function useSummarizer(): UseSummarizerReturn {
   const [state, setState] = useState<SummarizationState>({
-    isDownloading: false,
-    downloadProgress: 0,
-    isSummarizing: false,
-    summary: '',
-    error: null,
-    isModelLoaded: false
+    status: SummarizationStatus.Idle,
+    summary: null,
+    error: null
   });
 
-  const pipelineRef = useRef<SummarizationPipeline | null>(null);
-  const currentModelRef = useRef<string | null>(null);
+  const [modelState, setModelState] = useState<ModelState>();
 
   const reset = useCallback(() => {
     setState({
-      isDownloading: false,
-      downloadProgress: 0,
-      isSummarizing: false,
-      summary: '',
-      error: null,
-      isModelLoaded: false
+      status: SummarizationStatus.Idle,
+      summary: null,
+      error: null
     });
-    pipelineRef.current = null;
-    currentModelRef.current = null;
   }, []);
 
-  const loadModel = useCallback(async (modelId: string): Promise<SummarizationPipeline> => {
-    const model = SUMMARIZATION_MODELS.find(m => m.id === modelId);
+  const loadModel = useCallback(async (modelId: string): Promise<SummarizationPipeline | undefined> => {
+    const model = SUMMARIZATION_MODELS.find(item => item.id === modelId);
     if (!model) {
       throw new Error(`Model ${modelId} not found`);
     }
 
-    // If the same model is already loaded, return the existing pipeline
-    if (pipelineRef.current && currentModelRef.current === modelId) {
-      return pipelineRef.current;
-    }
-
-    setState(prev => ({
-      ...prev,
-      isDownloading: true,
-      downloadProgress: 0,
-      error: null
-    }));
-
     try {
       // Create a progress callback to track download progress
-      const progressCallback = (progress: any) => {
-        if (progress.status === 'downloading') {
-          const percent = Math.round((progress.loaded / progress.total) * 100);
-          setState(prev => ({
-            ...prev,
-            downloadProgress: percent
-          }));
-        }
+      const progressCallback = (newModelState: ModelState) => {
+        setModelState(newModelState);
       };
+      
+      console.log('ninja focus touch: before model.modelName =>', model.modelName);
+
+      setState(prev => ({
+        ...prev,
+        status: SummarizationStatus.ModelPending
+      }));
 
       // Load the pipeline with progress tracking
-      const generator = await pipeline('summarization', model.modelName, {
+      const summarizationPipeline = await pipeline('summarization', model.modelName, {
         progress_callback: progressCallback
       });
 
-      pipelineRef.current = generator;
-      currentModelRef.current = modelId;
-
       setState(prev => ({
         ...prev,
-        isDownloading: false,
-        downloadProgress: 100,
-        isModelLoaded: true
+        status: SummarizationStatus.ModelResolved
       }));
 
-      return generator;
+      return summarizationPipeline;
     } catch (error) {
       setState(prev => ({
         ...prev,
-        isDownloading: false,
-        downloadProgress: 0,
-        error: `Failed to load model: ${error instanceof Error ? error.message : 'Unknown error'}`
+        status: SummarizationStatus.ModelRejected,
+        error: new Error(`Failed to load model: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }));
-      throw error;
     }
   }, []);
 
-  const summarize = useCallback(async (text: string, modelId: string): Promise<void> => {
-    if (!text.trim()) {
-      setState(prev => ({
-        ...prev,
-        error: 'Please enter some text to summarize.'
-      }));
-      return;
-    }
-
+  const generateSummary = useCallback(async (text: string, summarizer: SummarizationPipeline): Promise<void> => {
     try {
+      if (!text.trim()) {
+        throw new Error('Please enter some text to summarize.');
+      }
+      
       setState(prev => ({
         ...prev,
-        isSummarizing: true,
-        error: null
+        status: SummarizationStatus.SummaryPending
       }));
-
-      // Load the model if needed
-      const pipeline = await loadModel(modelId);
 
       // Perform summarization
-      const result = await pipeline(text, {
+      const output = await summarizer(text, {
         max_length: 150,
         min_length: 30,
         do_sample: false
@@ -167,22 +143,39 @@ export function useSummarizer(): UseSummarizerReturn {
 
       setState(prev => ({
         ...prev,
-        isSummarizing: false,
-        summary: result[0]?.summary_text || 'Unable to generate summary from the provided text.'
+        status: SummarizationStatus.SummaryResolved,
+        summary: (output[0] as unknown as SummarizationSingle).summary_text || 'Unable to generate summary from the provided text.'
       }));
     } catch (error) {
       setState(prev => ({
         ...prev,
-        isSummarizing: false,
-        error: `Summarization failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        status: SummarizationStatus.SummaryRejected,
+        error: new Error(`Failed to summarize text: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }));
     }
-  }, [loadModel]);
+  }, []);
+
+  const summarize = useCallback(async (text: string, modelId: string): Promise<void> => {
+    // Load the model if needed
+    const summarizer = await loadModel(modelId);
+    if (!summarizer) {
+      return;
+    }
+
+    await generateSummary(text, summarizer);
+  }, [loadModel, generateSummary]);
 
   return {
     state,
+    modelState,
     summarize,
     reset
   };
 }
+
+export {
+  SummarizationStatus,
+  SUMMARIZATION_MODELS,
+  useSummarizer
+};
 // ninja focus touch >
