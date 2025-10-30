@@ -18,7 +18,6 @@ let summarizer: SummarizationPipeline | null = null;
 let currentModelSource: string | null = null;
 
 const post = (msg: WorkerOutboundMessage) => {
-  // @ts-expect-error WorkerGlobalScope typing
   postMessage(msg);
 };
 
@@ -72,7 +71,6 @@ const handleGenerateSummary = async (text: string) => {
   }
 };
 
-// @ts-expect-error WorkerGlobalScope typing
 self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
   const data = event.data;
   if (!data) return;
