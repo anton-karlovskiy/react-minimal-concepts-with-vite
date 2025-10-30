@@ -29,8 +29,8 @@ const handleLoadModel = async (modelSource: string) => {
     }
 
     // Report progress as the model is downloaded/initialized
-    const progress_callback = (state: { status: string; progress?: number }) => {
-      post({ type: "model-progress", status: state.status, progress: state.progress });
+    const progress_callback = (modelState: { status: string; progress?: number }) => {
+      post({ type: "model-progress", status: modelState.status, progress: modelState.progress });
     };
 
     summarizer = await pipeline("summarization", modelSource, { progress_callback });
