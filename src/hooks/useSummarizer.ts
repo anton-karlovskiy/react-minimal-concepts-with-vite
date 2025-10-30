@@ -1,8 +1,4 @@
-import { useState, useCallback, useRef } from "react";
-import { pipeline, SummarizationPipeline, env, SummarizationSingle } from "@xenova/transformers";
-
-// Disable local models
-env.allowLocalModels = false;
+import { useState, useCallback, useRef, useEffect } from "react";
 
 interface SummarizationModel {
   name: string;
@@ -69,8 +65,26 @@ function useSummarizer(): UseSummarizerReturn {
 
   const [modelState, setModelState] = useState<ModelState>();
 
-  const pipelineRef = useRef<SummarizationPipeline | null>(null);
+  const workerRef = useRef<Worker | null>(null);
   const currentModelRef = useRef<string | null>(null);
+
+  type WorkerInbound =
+    | { type: "load"; modelSource: string }
+    | { type: "summarize"; text: string };
+
+  type WorkerOutbound =
+    | { type: "model-progress"; status: string; progress?: number }
+    | { type: "model-ready" }
+    | { type: "model-error"; message: string }
+    | { type: "summary-result"; summary: string }
+    | { type: "summary-error"; message: string };
+
+  const ensureWorker = useCallback(() => {
+    if (workerRef.current) return workerRef.current;
+    const worker = new Worker(new URL("../workers/summarizer.worker.ts", import.meta.url), { type: "module" });
+    workerRef.current = worker;
+    return worker;
+  }, []);
 
   const reset = useCallback(() => {
     setState({
@@ -79,72 +93,82 @@ function useSummarizer(): UseSummarizerReturn {
       error: null
     });
 
-    pipelineRef.current = null;
     currentModelRef.current = null;
   }, []);
 
-  const loadModel = useCallback(async (modelSource: string): Promise<SummarizationPipeline | undefined> => {
-    // If the same model is already loaded, return the existing pipeline
-    if (pipelineRef.current && currentModelRef.current === modelSource) {
-      return pipelineRef.current;
+  const loadModel = useCallback(async (modelSource: string): Promise<boolean> => {
+    if (currentModelRef.current === modelSource) {
+      return true;
     }
 
-    try {
-      // Create a progress callback to track download progress
-      const progressCallback = (newModelState: ModelState) => {
-        setModelState(newModelState);
+    const worker = ensureWorker();
+
+    setState(prev => ({ ...prev, status: SummarizationStatus.ModelPending }));
+
+    const modelReady = new Promise<boolean>((resolve, reject) => {
+      const handleMessage = (event: MessageEvent<WorkerOutbound>) => {
+        const data = event.data;
+        if (!data) return;
+        switch (data.type) {
+          case "model-progress":
+            setModelState({ status: data.status, progress: data.progress });
+            break;
+          case "model-ready":
+            worker.removeEventListener("message", handleMessage as EventListener);
+            currentModelRef.current = modelSource;
+            setState(prev => ({ ...prev, status: SummarizationStatus.ModelResolved }));
+            resolve(true);
+            break;
+          case "model-error":
+            worker.removeEventListener("message", handleMessage as EventListener);
+            setState(prev => ({
+              ...prev,
+              status: SummarizationStatus.ModelRejected,
+              error: new Error(data.message)
+            }));
+            reject(new Error(data.message));
+            break;
+        }
       };
-      
-      setState(prev => ({
-        ...prev,
-        status: SummarizationStatus.ModelPending
-      }));
+      worker.addEventListener("message", handleMessage as EventListener);
+    });
 
-      // Load the pipeline with progress tracking
-      const generator = await pipeline("summarization", modelSource, {
-        progress_callback: progressCallback
-      });
+    worker.postMessage({ type: "load", modelSource } as WorkerInbound);
+    return modelReady;
+  }, [ensureWorker]);
 
-      pipelineRef.current = generator;
-      currentModelRef.current = modelSource;
-
-      setState(prev => ({
-        ...prev,
-        status: SummarizationStatus.ModelResolved
-      }));
-
-      return generator;
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        status: SummarizationStatus.ModelRejected,
-        error: new Error(`Failed to load model: ${error instanceof Error ? error.message : "Unknown error"}`)
-      }));
-    }
-  }, []);
-
-  const generateSummary = useCallback(async (text: string, summarizer: SummarizationPipeline): Promise<void> => {
+  const generateSummary = useCallback(async (text: string): Promise<void> => {
     try {
       if (!text.trim()) {
         throw new Error("Please enter some text to summarize.");
       }
-      
-      setState(prev => ({
-        ...prev,
-        status: SummarizationStatus.SummaryPending
-      }));
 
-      // Perform summarization
-      const output = await summarizer(text, {
-        max_length: 150,
-        min_length: 30,
-        do_sample: false
+      const worker = ensureWorker();
+
+      setState(prev => ({ ...prev, status: SummarizationStatus.SummaryPending }));
+
+      const result = await new Promise<string>((resolve, reject) => {
+        const handleMessage = (event: MessageEvent<WorkerOutbound>) => {
+          const data = event.data;
+          if (!data) return;
+          switch (data.type) {
+            case "summary-result":
+              worker.removeEventListener("message", handleMessage as EventListener);
+              resolve(data.summary);
+              break;
+            case "summary-error":
+              worker.removeEventListener("message", handleMessage as EventListener);
+              reject(new Error(data.message));
+              break;
+          }
+        };
+        worker.addEventListener("message", handleMessage as EventListener);
       });
 
       setState(prev => ({
         ...prev,
         status: SummarizationStatus.SummaryResolved,
-        summary: (output[0] as unknown as SummarizationSingle).summary_text || "Unable to generate summary from the provided text."
+        summary: result
       }));
     } catch (error) {
       setState(prev => ({
@@ -153,17 +177,24 @@ function useSummarizer(): UseSummarizerReturn {
         error: new Error(`Failed to summarize text: ${error instanceof Error ? error.message : "Unknown error"}`)
       }));
     }
-  }, []);
+  }, [ensureWorker]);
 
   const summarize = useCallback(async (text: string, modelSource: string): Promise<void> => {
-    // Load the model if needed
-    const summarizer = await loadModel(modelSource);
-    if (!summarizer) {
-      return;
-    }
+    const loaded = await loadModel(modelSource);
+    if (!loaded) return;
+    const worker = ensureWorker();
+    worker.postMessage({ type: "summarize", text } as WorkerInbound);
+    await generateSummary(text);
+  }, [loadModel, generateSummary, ensureWorker]);
 
-    await generateSummary(text, summarizer);
-  }, [loadModel, generateSummary]);
+  useEffect(() => {
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     state,
