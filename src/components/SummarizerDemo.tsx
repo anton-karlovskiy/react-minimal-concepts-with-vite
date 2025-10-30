@@ -89,7 +89,7 @@ function SummarizerDemo() {
         {summarizeButtonCaption}
       </Button>
 
-      {state.status === SummarizationStatus.ModelRejected || state.status === SummarizationStatus.SummaryRejected && state.error && (
+      {(state.status === SummarizationStatus.ModelRejected || state.status === SummarizationStatus.SummaryRejected) && state.error && (
         <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-300 text-sm">
           {state.error.message}
         </div>
