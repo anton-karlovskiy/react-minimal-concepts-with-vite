@@ -68,7 +68,6 @@ function useSummarizer(): UseSummarizerReturn {
   const [modelState, setModelState] = useState<ModelState>();
 
   const workerRef = useRef<Worker | null>(null);
-  const currentModelRef = useRef<string | null>(null);
 
   const ensureWorker = useCallback(() => {
     if (workerRef.current) return workerRef.current;
@@ -83,15 +82,9 @@ function useSummarizer(): UseSummarizerReturn {
       summary: null,
       error: null
     });
-
-    currentModelRef.current = null;
   }, []);
 
   const loadModel = useCallback(async (modelSource: string): Promise<boolean> => {
-    if (currentModelRef.current === modelSource) {
-      return true;
-    }
-
     const worker = ensureWorker();
 
     setState(prev => ({ ...prev, status: SummarizationStatus.ModelPending }));
@@ -106,7 +99,6 @@ function useSummarizer(): UseSummarizerReturn {
             break;
           case "model-ready":
             worker.removeEventListener("message", handleMessage as EventListener);
-            currentModelRef.current = modelSource;
             setState(prev => ({ ...prev, status: SummarizationStatus.ModelResolved }));
             resolve(true);
             break;
