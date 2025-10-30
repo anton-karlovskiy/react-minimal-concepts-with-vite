@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 
-import type { WorkerInboundMessage, WorkerOutboundMessage } from "../workers/summarizer.worker";
+import type { WorkerInboundMessage, WorkerOutboundMessage, ModelState } from "../workers/summarizer.worker";
 
 interface SummarizationModel {
   name: string;
@@ -21,12 +21,6 @@ const SUMMARIZATION_MODELS: SummarizationModel[] = [
     size: "60MB",
     description: "Text-to-text transfer transformer",
     source: "Xenova/t5-small"
-  },
-  {
-    name: "PEGASUS XSum",
-    size: "2.2GB",
-    description: "Extreme summarization model",
-    source: "Xenova/pegasus-xsum"
   }
 ];
 
@@ -44,11 +38,6 @@ interface SummarizationState {
   status: SummarizationStatus;
   summary: string | null;
   error: Error | null;
-}
-
-interface ModelState {
-  status: string;
-  progress?: number;
 }
 
 interface UseSummarizerReturn {

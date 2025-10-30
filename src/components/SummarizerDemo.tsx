@@ -9,7 +9,9 @@ function SummarizerDemo() {
   const [text, setText] = useState("");
   const [selectedModelSource, setSelectedModelSource] = useState(SUMMARIZATION_MODELS[0].source);
 
+  // ninja focus touch <
   const { state, summarize, reset, modelState } = useSummarizer();
+  // ninja focus touch >
 
   const handleSummarize = useCallback(async () => {
     if (!text.trim()) {
@@ -66,6 +68,7 @@ function SummarizerDemo() {
         </Select>
       </div>
 
+      {/* ninja focus touch < */}
       {state.status === SummarizationStatus.ModelPending && modelState && (
         <div>
           <label className="block text-sm font-medium mb-2">
@@ -81,6 +84,7 @@ function SummarizerDemo() {
           )}
         </div>
       )}
+      {/* ninja focus touch > */}
 
       <Button
         onClick={handleSummarize}

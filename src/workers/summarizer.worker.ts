@@ -8,11 +8,38 @@ type WorkerInboundMessage =
   | { type: "generate-summarize"; text: string };
 
 type WorkerOutboundMessage =
+  // ninja focus touch <
   | { type: "model-progress"; status: string; progress?: number }
+  // ninja focus touch >
   | { type: "model-ready" }
   | { type: "model-error"; message: string }
   | { type: "summary-ready"; summary: string }
   | { type: "summary-error"; message: string };
+
+// ninja focus touch <
+// type ModelState =
+//   | { status: "initiate"; name: string; file: string; }
+//   | { status: "download"; name: string; file: string; }
+//   | { status: "progress"; name: string; file: string; progress: number; loaded: number; total: number; }
+//   | { status: "done"; name: string; file: string; }
+//   | { status: "ready"; task: string; model: string; };
+
+// interface ModelState {
+//   file: string;
+//   loaded: number;
+//   progress: number;
+//   total: number;
+//   name: string;
+//   status: string;
+//   task: string;
+//   model: string;
+// }
+
+interface ModelState {
+  progress?: number;
+  status: string;
+}
+// ninja focus touch >
 
 let summarizer: SummarizationPipeline | null = null;
 let currentModelSource: string | null = null;
@@ -29,8 +56,10 @@ const handleLoadModel = async (modelSource: string) => {
     }
 
     // Report progress as the model is downloaded/initialized
-    const progress_callback = (modelState: { status: string; progress?: number }) => {
+    const progress_callback = (modelState: ModelState) => {
+      // ninja focus touch <
       post({ type: "model-progress", status: modelState.status, progress: modelState.progress });
+      // ninja focus touch >
     };
 
     summarizer = await pipeline("summarization", modelSource, { progress_callback });
@@ -88,4 +117,8 @@ self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
   }
 };
 
-export type { WorkerInboundMessage, WorkerOutboundMessage };
+export type {
+  WorkerInboundMessage,
+  WorkerOutboundMessage,
+  ModelState
+};
