@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 
+import type { WorkerInboundMessage, WorkerOutboundMessage } from "../workers/summarizer.worker";
+
 interface SummarizationModel {
   name: string;
   size: string;
@@ -68,17 +70,6 @@ function useSummarizer(): UseSummarizerReturn {
   const workerRef = useRef<Worker | null>(null);
   const currentModelRef = useRef<string | null>(null);
 
-  type WorkerInbound =
-    | { type: "load"; modelSource: string }
-    | { type: "summarize"; text: string };
-
-  type WorkerOutbound =
-    | { type: "model-progress"; status: string; progress?: number }
-    | { type: "model-ready" }
-    | { type: "model-error"; message: string }
-    | { type: "summary-result"; summary: string }
-    | { type: "summary-error"; message: string };
-
   const ensureWorker = useCallback(() => {
     if (workerRef.current) return workerRef.current;
     const worker = new Worker(new URL("../workers/summarizer.worker.ts", import.meta.url), { type: "module" });
@@ -106,7 +97,7 @@ function useSummarizer(): UseSummarizerReturn {
     setState(prev => ({ ...prev, status: SummarizationStatus.ModelPending }));
 
     const modelReady = new Promise<boolean>((resolve, reject) => {
-      const handleMessage = (event: MessageEvent<WorkerOutbound>) => {
+      const handleMessage = (event: MessageEvent<WorkerOutboundMessage>) => {
         const data = event.data;
         if (!data) return;
         switch (data.type) {
@@ -133,7 +124,7 @@ function useSummarizer(): UseSummarizerReturn {
       worker.addEventListener("message", handleMessage as EventListener);
     });
 
-    worker.postMessage({ type: "load", modelSource } as WorkerInbound);
+    worker.postMessage({ type: "load-model", modelSource } as WorkerInboundMessage);
     return modelReady;
   }, [ensureWorker]);
 
@@ -148,11 +139,11 @@ function useSummarizer(): UseSummarizerReturn {
       setState(prev => ({ ...prev, status: SummarizationStatus.SummaryPending }));
 
       const result = await new Promise<string>((resolve, reject) => {
-        const handleMessage = (event: MessageEvent<WorkerOutbound>) => {
+        const handleMessage = (event: MessageEvent<WorkerOutboundMessage>) => {
           const data = event.data;
           if (!data) return;
           switch (data.type) {
-            case "summary-result":
+            case "summary-ready":
               worker.removeEventListener("message", handleMessage as EventListener);
               resolve(data.summary);
               break;
@@ -183,7 +174,7 @@ function useSummarizer(): UseSummarizerReturn {
     const loaded = await loadModel(modelSource);
     if (!loaded) return;
     const worker = ensureWorker();
-    worker.postMessage({ type: "summarize", text } as WorkerInbound);
+    worker.postMessage({ type: "generate-summarize", text } as WorkerInboundMessage);
     await generateSummary(text);
   }, [loadModel, generateSummary, ensureWorker]);
 

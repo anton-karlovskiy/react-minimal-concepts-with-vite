@@ -38,9 +38,6 @@ function SummarizerDemo() {
     }
   })();
 
-  console.log("state.status =>", state.status);
-  console.log("summarizeButtonCaption =>", summarizeButtonCaption);
-
   return (
     <div className="space-y-4">
       <div>

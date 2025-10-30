@@ -3,26 +3,26 @@ import { pipeline, SummarizationPipeline, env, SummarizationSingle } from "@xeno
 // Ensure we don't try to access local models inside the worker
 env.allowLocalModels = false;
 
-type InboundMessage =
-  | { type: "load"; modelSource: string }
-  | { type: "summarize"; text: string };
+type WorkerInboundMessage =
+  | { type: "load-model"; modelSource: string }
+  | { type: "generate-summarize"; text: string };
 
-type OutboundMessage =
+type WorkerOutboundMessage =
   | { type: "model-progress"; status: string; progress?: number }
   | { type: "model-ready" }
   | { type: "model-error"; message: string }
-  | { type: "summary-result"; summary: string }
+  | { type: "summary-ready"; summary: string }
   | { type: "summary-error"; message: string };
 
 let summarizer: SummarizationPipeline | null = null;
 let currentModelSource: string | null = null;
 
-const post = (msg: OutboundMessage) => {
+const post = (msg: WorkerOutboundMessage) => {
   // @ts-expect-error WorkerGlobalScope typing
   postMessage(msg);
 };
 
-const handleLoad = async (modelSource: string) => {
+const handleLoadModel = async (modelSource: string) => {
   try {
     if (summarizer && currentModelSource === modelSource) {
       post({ type: "model-ready" });
@@ -45,7 +45,7 @@ const handleLoad = async (modelSource: string) => {
   }
 };
 
-const handleSummarize = async (text: string) => {
+const handleGenerateSummary = async (text: string) => {
   try {
     if (!summarizer) {
       throw new Error("Model is not loaded.");
@@ -63,7 +63,7 @@ const handleSummarize = async (text: string) => {
     const summary = (output[0] as unknown as SummarizationSingle).summary_text ||
       "Unable to generate summary from the provided text.";
 
-    post({ type: "summary-result", summary });
+    post({ type: "summary-ready", summary });
   } catch (error) {
     post({
       type: "summary-error",
@@ -73,16 +73,16 @@ const handleSummarize = async (text: string) => {
 };
 
 // @ts-expect-error WorkerGlobalScope typing
-self.onmessage = (event: MessageEvent<InboundMessage>) => {
+self.onmessage = (event: MessageEvent<WorkerInboundMessage>) => {
   const data = event.data;
   if (!data) return;
 
   switch (data.type) {
-    case "load":
-      void handleLoad(data.modelSource);
+    case "load-model":
+      void handleLoadModel(data.modelSource);
       break;
-    case "summarize":
-      void handleSummarize(data.text);
+    case "generate-summarize":
+      void handleGenerateSummary(data.text);
       break;
     default:
       // no-op
@@ -90,4 +90,4 @@ self.onmessage = (event: MessageEvent<InboundMessage>) => {
   }
 };
 
-
+export type { WorkerInboundMessage, WorkerOutboundMessage };
