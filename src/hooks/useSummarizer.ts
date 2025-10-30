@@ -117,56 +117,52 @@ function useSummarizer(): UseSummarizerReturn {
     });
 
     worker.postMessage({ type: "load-model", modelSource } as WorkerInboundMessage);
+
     return modelReady;
   }, [ensureWorker]);
 
-  const generateSummary = useCallback(async (text: string): Promise<void> => {
-    try {
-      if (!text.trim()) {
-        throw new Error("Please enter some text to summarize.");
-      }
+  const generateSummary = useCallback(async (text: string): Promise<boolean> => {
+    const worker = ensureWorker();
 
-      const worker = ensureWorker();
+    setState(prev => ({ ...prev, status: SummarizationStatus.SummaryPending }));
 
-      setState(prev => ({ ...prev, status: SummarizationStatus.SummaryPending }));
+    const summaryReady = new Promise<boolean>((resolve, reject) => {
+      const handleMessage = (event: MessageEvent<WorkerOutboundMessage>) => {
+        const data = event.data;
+        if (!data) return;
+        switch (data.type) {
+          case "summary-ready":
+            worker.removeEventListener("message", handleMessage as EventListener);
+            setState(prev => ({
+              ...prev,
+              status: SummarizationStatus.SummaryResolved,
+              summary: data.summary
+            }));
+            resolve(true);
+            break;
+          case "summary-error":
+            worker.removeEventListener("message", handleMessage as EventListener);
+            setState(prev => ({
+              ...prev,
+              status: SummarizationStatus.SummaryRejected,
+              error: new Error(data.message)
+            }));
+            reject(new Error(data.message));
+            break;
+        }
+      };
+      worker.addEventListener("message", handleMessage as EventListener);
+    });
 
-      const result = await new Promise<string>((resolve, reject) => {
-        const handleMessage = (event: MessageEvent<WorkerOutboundMessage>) => {
-          const data = event.data;
-          if (!data) return;
-          switch (data.type) {
-            case "summary-ready":
-              worker.removeEventListener("message", handleMessage as EventListener);
-              resolve(data.summary);
-              break;
-            case "summary-error":
-              worker.removeEventListener("message", handleMessage as EventListener);
-              reject(new Error(data.message));
-              break;
-          }
-        };
-        worker.addEventListener("message", handleMessage as EventListener);
-      });
+    worker.postMessage({ type: "generate-summarize", text } as WorkerInboundMessage);
 
-      setState(prev => ({
-        ...prev,
-        status: SummarizationStatus.SummaryResolved,
-        summary: result
-      }));
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        status: SummarizationStatus.SummaryRejected,
-        error: new Error(`Failed to summarize text: ${error instanceof Error ? error.message : "Unknown error"}`)
-      }));
-    }
+    return summaryReady;
   }, [ensureWorker]);
 
   const summarize = useCallback(async (text: string, modelSource: string): Promise<void> => {
     const loaded = await loadModel(modelSource);
     if (!loaded) return;
-    const worker = ensureWorker();
-    worker.postMessage({ type: "generate-summarize", text } as WorkerInboundMessage);
+    
     await generateSummary(text);
   }, [loadModel, generateSummary, ensureWorker]);
 
