@@ -42,9 +42,7 @@ interface SummarizationState {
 
 interface UseSummarizerReturn {
   state: SummarizationState;
-  // ninja focus touch <
   modelStates: ModelState[];
-  // ninja focus touch >
   summarize: (text: string, modelSource: string) => Promise<void>;
   reset: () => void;
 }
@@ -56,9 +54,7 @@ function useSummarizer(): UseSummarizerReturn {
     error: null
   });
 
-  // ninja focus touch <
   const [modelStates, setModelStates] = useState<ModelState[]>([]);
-  // ninja focus touch >
 
   const workerRef = useRef<Worker | null>(null);
 
@@ -88,7 +84,6 @@ function useSummarizer(): UseSummarizerReturn {
         
         switch (data.type) {
           case "model-progress": {
-            // ninja focus touch <
             switch (data.modelState.status) {
               case "initiate": {
                 setModelStates(prev => [...prev, data.modelState]);
@@ -124,7 +119,6 @@ function useSummarizer(): UseSummarizerReturn {
               default:
                 break;
             }
-            // ninja focus touch >
             break;
           }
           case "model-ready": {
@@ -215,9 +209,7 @@ function useSummarizer(): UseSummarizerReturn {
 
   return {
     state,
-    // ninja focus touch <
     modelStates,
-    // ninja focus touch >
     summarize,
     reset
   };

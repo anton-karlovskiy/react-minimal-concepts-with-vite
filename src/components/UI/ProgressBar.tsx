@@ -1,4 +1,3 @@
-// ninja focus touch <
 interface ProgressBarProps {
   text: string;
   percentage: number; // 0-100
@@ -20,4 +19,3 @@ function ProgressBar({ text, percentage }: ProgressBarProps) {
 }
 
 export default ProgressBar;
-// ninja focus touch >
