@@ -6,15 +6,17 @@
 [![Redux Toolkit](https://img.shields.io/badge/redux_toolkit-2.x-764ABC.svg)](https://redux-toolkit.js.org/)
 [![Zustand](https://img.shields.io/badge/zustand-4.x-000.svg)](https://github.com/pmndrs/zustand)
 [![TanStack Query](https://img.shields.io/badge/tanstack_query-5.x-FF4154.svg)](https://tanstack.com/query/latest)
+[![Transformers.js](https://img.shields.io/badge/transformers.js-trending_FF?logo=huggingface&logoColor=white&labelColor=FFD21E&color=555)](https://huggingface.co/models?library=transformers.js)
+[![Best Practices](https://img.shields.io/badge/best_practices-kentcdodds.com-000000.svg)](https://kentcdodds.com)
 
-Learn and compare modern React concepts in a tiny, fast Vite + TypeScript playground. This repo demonstrates automatic batching, transitions, React Actions (`useActionState`, `useFormStatus`), optimistic UI via `useOptimistic`, global state with Redux Toolkit vs Zustand, local state with `useReducer` and Context, and server-state with TanStack Query — all in one minimal project.
+Learn and compare modern React concepts in a tiny, fast Vite + TypeScript playground. Explore focused, side‑by‑side demos covering performance primitives (automatic batching, transitions), modern Actions/form APIs, optimistic UI, status‑driven loading, global vs local state, server cache with TanStack Query, and practical AI integrations — all in one minimal project.
 
 ## Why this project?
-- Explore the practical differences between Redux Toolkit and Zustand on identical examples.
-- See modern React performance features (automatic batching, `startTransition`) in action.
-- Try React Actions with optimistic updates and graceful error handling.
-- Compare different state management approaches: global (Redux/Zustand) vs local (useReducer/Context).
-- Understand where a server cache (TanStack Query) fits vs client state.
+- Learn by experimenting with focused, side-by-side demos of modern React concepts.
+- Compare state management approaches (Redux Toolkit, Zustand, `useReducer`, Context) in identical scenarios.
+- Practice real-world async UX patterns: status-driven loading, optimistic UI, transitions, and error/retry.
+- See where a server cache (TanStack Query) complements client state.
+- Explore practical AI integrations (e.g., text summarization with model selection and progress).
 
 ## Features at a glance
 - **Automatic batching**: fewer renders during grouped updates.
@@ -33,6 +35,7 @@ Learn and compare modern React concepts in a tiny, fast Vite + TypeScript playgr
 - Redux Toolkit, React Redux
 - Zustand
 - TanStack React Query 5
+- Transformers.js (Hugging Face)
 - Tailwind CSS 4 (via `@tailwindcss/vite`)
 
 ## Quick start
@@ -65,17 +68,24 @@ pnpm build && pnpm preview
 ```
 src/
   components/
-    ActionsDemo.tsx         # React 19 Actions + optimistic UI
+    ActionsDemo.tsx         # React Actions + optimistic UI
     BatchingDemo.tsx        # Automatic batching
-    TransitionDemo.tsx      # startTransition demo
-    ReduxDemo.tsx           # Redux Toolkit example
-    ZustandDemo.tsx         # Zustand example
+    ContextDemo/            # Context + provider pattern
+    LoadingDemo.tsx         # Status enum over isLoading booleans
     QueryDemo.tsx           # TanStack Query example
     ReducerDemo.tsx         # useReducer example
-    ContextDemo/            # Context + provider pattern
-    SummarizerDemo.tsx      # Text summarization demo
-    LoadingDemo.tsx         # Status enum over isLoading booleans
-  state/                    # redux store + zustand store
+    ReduxDemo.tsx           # Redux Toolkit example
+    SummarizerDemo.tsx      # AI text summarization demo
+    TransitionDemo.tsx      # startTransition demo
+    ZustandDemo.tsx         # Zustand example
+  hooks/
+    useSummarizer.ts        # Hook for summarizer worker + model loading
+  state/                    # Redux store + Zustand store
+    store.ts
+    zustand.ts
+  workers/
+    summarizer.worker.ts    # Web Worker powering text summarization
+  style.css
   main.tsx, App.tsx
 ```
 
@@ -94,7 +104,8 @@ src/
 - Zustand: https://github.com/pmndrs/zustand
 - TanStack Query: https://tanstack.com/query/latest
 - Vite: https://vitejs.dev
-- Stop using isLoading booleans (Kent C. Dodds): https://kentcdodds.com/blog/stop-using-isloading-booleans
+- Transformers.js models (AI on the web): https://huggingface.co/models?library=transformers.js
+- Best practices (Kent C. Dodds): https://kentcdodds.com
 
 ## SEO keywords (for discoverability)
-React actions, useActionState, useFormStatus, useOptimistic, React transitions, startTransition, automatic batching, Redux Toolkit vs Zustand, useReducer, React Context, TanStack React Query, Vite React TypeScript starter, React features, optimistic UI example, React state management comparison, minimal React concepts demo
+React actions, useActionState, useFormStatus, useOptimistic, optimistic UI, React transitions, startTransition, automatic batching, status-driven loading, loading states enum, idle/pending/resolved/rejected, Redux Toolkit vs Zustand, Redux Toolkit, Zustand, useReducer, React Context, TanStack React Query, server cache, Transformers.js, Hugging Face, AI summarization, text summarization, model selection, on-device AI, web workers, progress bar, Vite React TypeScript starter, React features, React state management comparison, minimal React concepts demo
