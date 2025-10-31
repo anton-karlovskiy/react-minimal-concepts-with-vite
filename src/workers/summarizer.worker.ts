@@ -67,8 +67,7 @@ const handleGenerateSummary = async (text: string) => {
 
     const output = await summarizer(text, {
       max_length: 150,
-      min_length: 30,
-      do_sample: false
+      min_length: 40
     });
 
     const summary = (output[0] as unknown as SummarizationSingle).summary_text ||
