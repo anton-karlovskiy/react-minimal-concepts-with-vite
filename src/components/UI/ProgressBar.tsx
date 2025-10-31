@@ -1,16 +1,23 @@
+// ninja focus touch <
 interface ProgressBarProps {
-  progress: number; // 0-100
+  text: string;
+  percentage: number; // 0-100
   className?: string;
 }
 
-function ProgressBar({ progress, className = "" }: ProgressBarProps) {
+function ProgressBar({ text, percentage }: ProgressBarProps) {
   return (
-    <div className={`w-full bg-[#2b2e35] rounded-full h-2 ${className}`}>
-      <div 
-        className="bg-[#646CFF] h-2 rounded-full transition-all duration-300 ease-out"
-        style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} />
+    <div className={`w-full rounded-full bg-[#2b2e35]`}>
+      <div
+        className="whitespace-nowrap rounded-full bg-[#646CFF] text-sm text-white transition-all duration-300 ease-out"
+        style={{ width: `${Math.min(100, Math.max(0, percentage))}%` }}>
+          <span className="mx-3">
+          {text} ({`${percentage.toFixed(2)}%`})
+          </span>
+        </div>
     </div>
   );
 }
 
 export default ProgressBar;
+// ninja focus touch >

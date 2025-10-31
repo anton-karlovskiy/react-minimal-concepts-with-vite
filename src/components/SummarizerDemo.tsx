@@ -10,7 +10,7 @@ function SummarizerDemo() {
   const [selectedModelSource, setSelectedModelSource] = useState(SUMMARIZATION_MODELS[0].source);
 
   // ninja focus touch <
-  const { state, summarize, reset, modelState } = useSummarizer();
+  const { state, summarize, reset, modelStates } = useSummarizer();
   // ninja focus touch >
 
   const handleSummarize = useCallback(async () => {
@@ -32,7 +32,7 @@ function SummarizerDemo() {
   const summarizeButtonCaption = (() => {
     switch (state.status) {
       case SummarizationStatus.ModelPending:
-        return "Downloading Model...";
+        return "Loading Model...";
       case SummarizationStatus.SummaryPending:
         return "Summarizing...";
       default:
@@ -69,19 +69,28 @@ function SummarizerDemo() {
       </div>
 
       {/* ninja focus touch < */}
-      {state.status === SummarizationStatus.ModelPending && modelState && (
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Downloading Model...
+      {state.status === SummarizationStatus.ModelPending && modelStates.length > 0 && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">
+            Loading model files... (only run once)
           </label>
-          {modelState.progress && (
-            <>
-              <ProgressBar progress={modelState.progress} />
-              <p className="text-xs text-gray-400 mt-1">
-                {modelState.status} {modelState.progress}% complete
-              </p>
-            </>  
-          )}
+          {modelStates.map(item => {
+            if (!("file" in item) || !("name" in item)) {
+              throw new Error("Invalid model state");
+            }
+
+            let percentage = 0;
+            if ("progress" in item) {
+              percentage = item.progress;
+            }
+
+            return (
+              <ProgressBar
+                key={item.file}
+                text={`${item.name} (${item.file})`}
+                percentage={percentage} />
+            );
+          })}
         </div>
       )}
       {/* ninja focus touch > */}

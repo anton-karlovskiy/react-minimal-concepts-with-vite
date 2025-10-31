@@ -42,7 +42,9 @@ interface SummarizationState {
 
 interface UseSummarizerReturn {
   state: SummarizationState;
-  modelState: ModelState | undefined;
+  // ninja focus touch <
+  modelStates: ModelState[];
+  // ninja focus touch >
   summarize: (text: string, modelSource: string) => Promise<void>;
   reset: () => void;
 }
@@ -54,7 +56,9 @@ function useSummarizer(): UseSummarizerReturn {
     error: null
   });
 
-  const [modelState, setModelState] = useState<ModelState>();
+  // ninja focus touch <
+  const [modelStates, setModelStates] = useState<ModelState[]>([]);
+  // ninja focus touch >
 
   const workerRef = useRef<Worker | null>(null);
 
@@ -81,17 +85,55 @@ function useSummarizer(): UseSummarizerReturn {
     const modelReady = new Promise<boolean>((resolve, reject) => {
       const handleMessage = (event: MessageEvent<WorkerOutboundMessage>) => {
         const data = event.data;
-        if (!data) return;
+        
         switch (data.type) {
-          case "model-progress":
-            setModelState({ status: data.status, progress: data.progress });
+          case "model-progress": {
+            // ninja focus touch <
+            switch (data.modelState.status) {
+              case "initiate": {
+                setModelStates(prev => [...prev, data.modelState]);
+                break;
+              }
+              case "progress": {
+                setModelStates(prev =>
+                  prev.map(item => {
+                    if (!("file" in item) || !("file" in data.modelState) || !("progress" in data.modelState)) {
+                      throw new Error("Invalid model state");
+                    }
+
+                    if (item.file === data.modelState.file) {
+                      return { ...item, progress: data.modelState.progress } as ModelState;
+                    }
+                    return item;
+                  })
+                );
+                break;
+              }
+              case "done": {
+                setModelStates(prev =>
+                  prev.filter(item => {
+                    if (!("file" in item) || !("file" in data.modelState)) {
+                      throw new Error("Invalid model state");
+                    }
+
+                    return item.file !== data.modelState.file;
+                  })
+                );
+                break;
+              }
+              default:
+                break;
+            }
+            // ninja focus touch >
             break;
-          case "model-ready":
+          }
+          case "model-ready": {
             worker.removeEventListener("message", handleMessage as EventListener);
             setState(prev => ({ ...prev, status: SummarizationStatus.ModelResolved }));
             resolve(true);
             break;
-          case "model-error":
+          }
+          case "model-error": {
             worker.removeEventListener("message", handleMessage as EventListener);
             setState(prev => ({
               ...prev,
@@ -100,6 +142,9 @@ function useSummarizer(): UseSummarizerReturn {
             }));
             reject(new Error(data.message));
             break;
+          }
+          default:
+            throw new Error(`Unknown model message type: ${data.type}`);
         }
       };
       worker.addEventListener("message", handleMessage as EventListener);
@@ -120,7 +165,7 @@ function useSummarizer(): UseSummarizerReturn {
         const data = event.data;
         if (!data) return;
         switch (data.type) {
-          case "summary-ready":
+          case "summary-ready": {
             worker.removeEventListener("message", handleMessage as EventListener);
             setState(prev => ({
               ...prev,
@@ -129,7 +174,8 @@ function useSummarizer(): UseSummarizerReturn {
             }));
             resolve(true);
             break;
-          case "summary-error":
+          }
+          case "summary-error": {
             worker.removeEventListener("message", handleMessage as EventListener);
             setState(prev => ({
               ...prev,
@@ -138,6 +184,9 @@ function useSummarizer(): UseSummarizerReturn {
             }));
             reject(new Error(data.message));
             break;
+          }
+          default:
+            throw new Error(`Unknown summary message type: ${data.type}`);
         }
       };
       worker.addEventListener("message", handleMessage as EventListener);
@@ -166,7 +215,9 @@ function useSummarizer(): UseSummarizerReturn {
 
   return {
     state,
-    modelState,
+    // ninja focus touch <
+    modelStates,
+    // ninja focus touch >
     summarize,
     reset
   };
