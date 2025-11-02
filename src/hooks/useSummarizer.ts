@@ -12,13 +12,25 @@ interface SummarizationModel {
 const SUMMARIZATION_MODELS: SummarizationModel[] = [
   {
     name: "BART Large CNN",
-    size: "1.6GB",
+    size: "~462MB",
     description: "High-quality abstractive summarization",
     source: "Xenova/bart-large-cnn"
   },
   {
+    name: "Distilbart CNN",
+    size: "~284MB",
+    description: "N/A",
+    source: "Xenova/distilbart-cnn-6-6"
+  },
+  {
+    name: "T5 Base",
+    size: "~250MB",
+    description: "Text-to-text transfer transformer",
+    source: "Xenova/t5-base"
+  },
+  {
     name: "T5 Small",
-    size: "60MB",
+    size: "~78MB",
     description: "Text-to-text transfer transformer",
     source: "Xenova/t5-small"
   }

@@ -26,6 +26,11 @@ function ChunkSummarizerDemo() {
 
     try {
       const summary = await summarizeHierarchical(text);
+
+      console.log("ninja focus touch: summary.final =>", summary.final);
+      console.log("ninja focus touch: summary.perChunk =", summary.perChunk);
+      console.log("ninja focus touch: summary.merged =", summary.merged);
+      
       setResult(summary);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Unknown error"));
