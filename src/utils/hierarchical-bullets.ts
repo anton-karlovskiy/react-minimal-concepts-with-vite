@@ -4,12 +4,12 @@
 import { pipeline, env, Text2TextGenerationPipeline } from '@xenova/transformers';
 
 // ---------- Tunables ----------
-const MAX_CHUNK_CHARS = 2400;     // ~500–700 tokens depending on text; adjust as needed
-const CHUNK_OVERLAP   = 200;      // a little overlap helps coherence
+const MAX_CHUNK_CHARS = 1800;     // Conservative chunk size to leave room for prompt (~450-550 tokens)
+const CHUNK_OVERLAP   = 150;      // a little overlap helps coherence
 const CONCURRENCY     = 2;        // >1 = faster on multi-core; keep small for WASM
-const CHUNK_BULLETS   = 5;        // target bullets per chunk (soft target)
-const FINAL_BULLETS   = 8;        // target bullets in the final summary
-const MAX_NEW_TOKENS  = 128;      // generation cap per call
+const CHUNK_BULLETS   = 3;        // target bullets per chunk (reduced for better quality)
+const FINAL_BULLETS   = 5;        // target bullets in the final summary
+const MAX_NEW_TOKENS  = 200;      // generation cap per call (increased for better completion)
 
 // Optional runtime hints (Browser):
 env.backends.onnx.wasm.numThreads = Math.max(1, Math.min(CONCURRENCY, (globalThis.navigator?.hardwareConcurrency ?? 4)));
@@ -47,8 +47,23 @@ function dedupeBullets(bulletsStr: string) {
   const out: string[] = [];
   for (let l of lines) {
     l = l.replace(/^[-•]\s*/, '').trim();
-    const key = l.toLowerCase();
-    if (!seen.has(key) && l.length > 0) {
+    // More intelligent deduplication: check for significant overlap, not just exact matches
+    const key = l.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+    // Also check if this is a substring/superset of existing bullets
+    let isDuplicate = false;
+    if (seen.has(key)) {
+      isDuplicate = true;
+    } else {
+      // Check for similar bullets (simple substring check)
+      for (const existing of seen) {
+        const similarity = Math.min(key.length, existing.length) / Math.max(key.length, existing.length);
+        if (similarity > 0.85 && (key.includes(existing.slice(0, 20)) || existing.includes(key.slice(0, 20)))) {
+          isDuplicate = true;
+          break;
+        }
+      }
+    }
+    if (!isDuplicate && l.length > 10) { // Minimum bullet length
       seen.add(key);
       out.push(`- ${l}`);
     }
@@ -105,42 +120,82 @@ function limitConcurrency<T>(tasks: Array<() => Promise<T>>, limit = CONCURRENCY
 // ---------- Prompt builders ----------
 function bulletPrompt(text: string, targetCount = CHUNK_BULLETS): string {
   return (
-    `summarize the following transcript into ${targetCount} concise bullet points.\n` +
-    `- use plain text bullets starting with "- "\n` +
-    `- keep each bullet under 20 words\n` +
-    `- preserve facts; do not invent information\n` +
-    `- remove filler and repetition\n\n` +
-    `${text}`
+    `Summarize the following text into exactly ${targetCount} concise bullet points.\n\n` +
+    `STRICT REQUIREMENTS:\n` +
+    `- Extract ONLY information that is explicitly stated in the text\n` +
+    `- DO NOT invent details, infer conclusions, or add information not in the source\n` +
+    `- DO NOT create contradictory statements (e.g., "X to X" or "Y from Y")\n` +
+    `- Use plain text bullets starting with "- "\n` +
+    `- Keep each bullet under 25 words\n` +
+    `- Focus on concrete actions, tools, results, and key facts\n` +
+    `- Remove filler words ("like", "you know", "so"), repetition, and redundant phrases\n` +
+    `- If a fact is unclear, omit it entirely rather than guessing\n\n` +
+    `Text:\n${text}\n\n` +
+    `Bullet points:`
   );
 }
 
 function finalBulletPrompt(bullets: string, finalCount = FINAL_BULLETS): string {
   return (
-    `You are given bullet points from multiple chunks of one conversation.\n` +
-    `Merge and distill them into the ${finalCount} most important bullet points.\n` +
-    `- output only bullets starting with "- "\n` +
-    `- keep each bullet under 20 words\n` +
-    `- avoid duplicates; prefer specificity over vagueness\n\n` +
-    `${bullets}`
+    `Merge the bullet points below from multiple text chunks into exactly ${finalCount} high-level, comprehensive bullet points.\n\n` +
+    `STRICT REQUIREMENTS:\n` +
+    `- Only combine information that appears in the source bullets\n` +
+    `- DO NOT invent, infer, or add details not explicitly in the source bullets\n` +
+    `- DO NOT create contradictory statements\n` +
+    `- Group related concepts together to form coherent, high-level summaries\n` +
+    `- Use plain text bullets starting with "- "\n` +
+    `- Keep each bullet under 30 words\n` +
+    `- Remove duplicates and merge similar ideas\n` +
+    `- Focus on the most important, distinct, and actionable points\n` +
+    `- If bullets conflict, prioritize the most frequently mentioned information\n` +
+    `- Each bullet should be substantive and specific, not vague\n\n` +
+    `Source bullets:\n${bullets}\n\n` +
+    `Merged high-level bullets:`
   );
 }
 
 // ---------- Core summarization ----------
-async function loadPipe(modelId = 'Xenova/t5-small'): Promise<Text2TextGenerationPipeline> {
+async function loadPipe(modelId: string): Promise<Text2TextGenerationPipeline> {
   // text2text-generation picks quantized ONNX by default when available
   return await pipeline('text2text-generation', modelId);
 }
 
 async function summarizeChunk(pipe: Text2TextGenerationPipeline, text: string, { bullets = CHUNK_BULLETS } = {}): Promise<string> {
   const prompt = bulletPrompt(text, bullets);
-  const out = await pipe(prompt, { max_new_tokens: MAX_NEW_TOKENS });
+  const out = await pipe(prompt, { 
+    max_new_tokens: MAX_NEW_TOKENS,
+    temperature: 0.3,  // Lower temperature for more factual, less creative output
+    repetition_penalty: 1.2,  // Reduce repetition
+  });
   // Normalize to "- " bullets, dedupe locally
   const output = out[0] as { generated_text?: string };
-  return dedupeBullets(hardWrapBullets(output.generated_text || ''));
+  let result = dedupeBullets(hardWrapBullets(output.generated_text || ''));
+  
+  // Post-process: remove obvious hallucinations and low-quality outputs
+  result = result.split('\n').map(line => {
+    const trimmed = line.replace(/^[-•]\s*/, '').trim();
+    if (!trimmed || trimmed.length < 15) return null; // Too short
+    
+    // Remove lines with obvious contradictions (e.g., "280 milliseconds to 280 milliseconds")
+    if (trimmed.match(/(\d+)\s+(?:to|from)\s+\1\s*(?:milliseconds|ms|seconds|minutes|hours|days)/i)) {
+      return null;
+    }
+    
+    // Remove lines that are just repetitive phrases (e.g., "The app is being run by...")
+    const words = trimmed.toLowerCase().split(/\s+/);
+    const uniqueWords = new Set(words);
+    if (words.length > 5 && uniqueWords.size < words.length * 0.5) {
+      return null; // Too repetitive
+    }
+    
+    return line;
+  }).filter(Boolean).join('\n');
+  
+  return result;
 }
 
 async function summarizeHierarchical(fullText: string, {
-  model = 'Xenova/t5-small',
+  model = 'Xenova/distilbart-cnn-6-6',
   maxChunkChars = MAX_CHUNK_CHARS,
   overlap = CHUNK_OVERLAP,
   perChunkBullets = CHUNK_BULLETS,
@@ -161,11 +216,53 @@ async function summarizeHierarchical(fullText: string, {
 
   // Merge & second-pass summary
   const merged = dedupeBullets(perChunk.join('\n'));
-  const finalPrompt = finalBulletPrompt(merged, finalBullets);
-  const finalOut = await pipe(finalPrompt, { max_new_tokens: MAX_NEW_TOKENS });
+  
+  // If merged bullets are already concise and within target count, consider using them directly
+  const mergedLines = merged.split('\n').filter(Boolean);
+  const shouldDoFinalPass = mergedLines.length > finalBullets * 1.5; // Only merge if significantly more than target
+  
+  let finalBulletsStr: string;
+  if (shouldDoFinalPass) {
+    const finalPrompt = finalBulletPrompt(merged, finalBullets);
+    const finalOut = await pipe(finalPrompt, { 
+      max_new_tokens: MAX_NEW_TOKENS,
+      temperature: 0.3,  // Lower temperature for factual output
+      repetition_penalty: 1.2,
+    });
 
-  const output = finalOut[0] as { generated_text?: string };
-  const finalBulletsStr = dedupeBullets(hardWrapBullets(output.generated_text || ''));
+    const output = finalOut[0] as { generated_text?: string };
+    finalBulletsStr = dedupeBullets(hardWrapBullets(output.generated_text || ''));
+    
+    // Post-process final output to remove hallucinations and improve quality
+    finalBulletsStr = finalBulletsStr.split('\n').map(line => {
+      const trimmed = line.replace(/^[-•]\s*/, '').trim();
+      if (!trimmed || trimmed.length < 20) return null; // Too short for meaningful summary
+      
+      // Remove lines with obvious contradictions
+      if (trimmed.match(/(\d+)\s+(?:to|from|improved|changed)\s+\1\s*(?:milliseconds|ms|seconds|minutes|hours|days)/i)) {
+        return null;
+      }
+      
+      // Remove overly repetitive lines
+      const words = trimmed.toLowerCase().split(/\s+/);
+      const uniqueWords = new Set(words);
+      if (words.length > 5 && uniqueWords.size < words.length * 0.55) {
+        return null; // Too repetitive
+      }
+      
+      // Remove vague passive constructions without substance
+      if (trimmed.split(' ').length < 8 && 
+          trimmed.toLowerCase().match(/^(the|a|an)\s+(app|application|system|software|tool)\s+(is|are|was|were|being)\s+(run|controlled|used|operated)/i)) {
+        return null;
+      }
+      
+      return line;
+    }).filter(Boolean).join('\n');
+  } else {
+    // If already concise enough, just take top N bullets
+    finalBulletsStr = mergedLines.slice(0, finalBullets).join('\n');
+  }
+  
   return { perChunk, merged, final: finalBulletsStr };
 }
 
