@@ -128,7 +128,7 @@ function finalBulletPrompt(bullets: string, finalCount = FINAL_BULLETS): string 
 // ---------- Core summarization ----------
 async function loadPipe(modelId = 'Xenova/t5-small'): Promise<Text2TextGenerationPipeline> {
   // text2text-generation picks quantized ONNX by default when available
-  return (await pipeline('text2text-generation', modelId)) as Text2TextGenerationPipeline;
+  return await pipeline('text2text-generation', modelId);
 }
 
 async function summarizeChunk(pipe: Text2TextGenerationPipeline, text: string, { bullets = CHUNK_BULLETS } = {}): Promise<string> {

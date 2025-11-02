@@ -9,6 +9,9 @@ import QueryDemo from "./components/QueryDemo";
 import ReducerDemo from "./components/ReducerDemo";
 import ContextDemo from "./components/ContextDemo";
 import SummarizerDemo from "./components/SummarizerDemo";
+// ninja focus touch <
+import ChunkSummarizerDemo from "./components/ChunkSummarizerDemo";
+// ninja focus touch >
 import LoadingDemo from "./components/LoadingDemo";
 import Card from "./components/UI/Card";
 import Small from "./components/UI/Small";
@@ -64,6 +67,12 @@ export default function App() {
             <DemoTitle>Text Summarization</DemoTitle>
             <SummarizerDemo />
           </Card>
+          {/* ninja focus touch < */}
+          <Card>
+            <DemoTitle>Hierarchical Bullet Summarization</DemoTitle>
+            <ChunkSummarizerDemo />
+          </Card>
+          {/* ninja focus touch > */}
           <Card>
             <DemoTitle>Stop using isLoading booleans</DemoTitle>
             <LoadingDemo />
