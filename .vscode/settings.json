@@ -4,6 +4,8 @@
         "distilbert",
         "Dodds",
         "janky",
+        "onnx",
+        "Tunables",
         "xenova",
         "xsum"
     ]

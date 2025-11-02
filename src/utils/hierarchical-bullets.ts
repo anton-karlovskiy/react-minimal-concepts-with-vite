@@ -1,7 +1,7 @@
-// hierarchical-bullets.js
+// ninja focus touch <
 // Works in browser (ESM) or Node >=18 with "type": "module"
 
-import { pipeline, env } from '@xenova/transformers';
+import { pipeline, env, Text2TextGenerationPipeline } from '@xenova/transformers';
 
 // ---------- Tunables ----------
 const MAX_CHUNK_CHARS = 2400;     // ~500–700 tokens depending on text; adjust as needed
@@ -20,11 +20,11 @@ env.backends.onnx.wasm.proxy = true; // worker offload
 */
 
 // ---------- Utilities ----------
-function normalizeWhitespace(s) {
+function normalizeWhitespace(s: string) {
   return s.replace(/\s+/g, ' ').replace(/\s*-\s*/g, ' - ').trim();
 }
 
-function hardWrapBullets(text) {
+function hardWrapBullets(text: string) {
   // Ensure each line starts with "- "
   const lines = text
     .split(/\r?\n/)
@@ -41,10 +41,10 @@ function hardWrapBullets(text) {
   return bullets.join('\n');
 }
 
-function dedupeBullets(bulletsStr) {
-  const lines = bulletsStr.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const seen = new Set();
-  const out = [];
+function dedupeBullets(bulletsStr: string) {
+  const lines = bulletsStr.split(/\r?\n/).map((l: string) => l.trim()).filter(Boolean);
+  const seen = new Set<string>();
+  const out: string[] = [];
   for (let l of lines) {
     l = l.replace(/^[-•]\s*/, '').trim();
     const key = l.toLowerCase();
@@ -56,12 +56,12 @@ function dedupeBullets(bulletsStr) {
   return out.join('\n');
 }
 
-function splitIntoChunks(text, maxChars = MAX_CHUNK_CHARS, overlap = CHUNK_OVERLAP) {
+function splitIntoChunks(text: string, maxChars = MAX_CHUNK_CHARS, overlap = CHUNK_OVERLAP): string[] {
   // Prefer to break on sentence boundaries if possible
   const clean = normalizeWhitespace(text);
   if (clean.length <= maxChars) return [clean];
 
-  const chunks = [];
+  const chunks: string[] = [];
   let i = 0;
   while (i < clean.length) {
     let end = Math.min(i + maxChars, clean.length);
@@ -78,9 +78,9 @@ function splitIntoChunks(text, maxChars = MAX_CHUNK_CHARS, overlap = CHUNK_OVERL
   return chunks;
 }
 
-function limitConcurrency(tasks, limit = CONCURRENCY) {
+function limitConcurrency<T>(tasks: Array<() => Promise<T>>, limit = CONCURRENCY): Promise<T[]> {
   return new Promise((resolve, reject) => {
-    const results = Array(tasks.length);
+    const results = Array<T>(tasks.length);
     let next = 0, running = 0, done = 0;
 
     const runNext = () => {
@@ -88,7 +88,7 @@ function limitConcurrency(tasks, limit = CONCURRENCY) {
         const cur = next++;
         running++;
         tasks[cur]()
-          .then(res => { results[cur] = res; })
+          .then((res: T) => { results[cur] = res; })
           .catch(reject)
           .finally(() => {
             running--;
@@ -103,7 +103,7 @@ function limitConcurrency(tasks, limit = CONCURRENCY) {
 }
 
 // ---------- Prompt builders ----------
-function bulletPrompt(text, targetCount = CHUNK_BULLETS) {
+function bulletPrompt(text: string, targetCount = CHUNK_BULLETS): string {
   return (
     `summarize the following transcript into ${targetCount} concise bullet points.\n` +
     `- use plain text bullets starting with "- "\n` +
@@ -114,7 +114,7 @@ function bulletPrompt(text, targetCount = CHUNK_BULLETS) {
   );
 }
 
-function finalBulletPrompt(bullets, finalCount = FINAL_BULLETS) {
+function finalBulletPrompt(bullets: string, finalCount = FINAL_BULLETS): string {
   return (
     `You are given bullet points from multiple chunks of one conversation.\n` +
     `Merge and distill them into the ${finalCount} most important bullet points.\n` +
@@ -126,38 +126,46 @@ function finalBulletPrompt(bullets, finalCount = FINAL_BULLETS) {
 }
 
 // ---------- Core summarization ----------
-async function loadPipe(modelId = 'Xenova/t5-small') {
+async function loadPipe(modelId = 'Xenova/t5-small'): Promise<Text2TextGenerationPipeline> {
   // text2text-generation picks quantized ONNX by default when available
-  return pipeline('text2text-generation', modelId);
+  return (await pipeline('text2text-generation', modelId)) as Text2TextGenerationPipeline;
 }
 
-async function summarizeChunk(pipe, text, { bullets = CHUNK_BULLETS } = {}) {
+async function summarizeChunk(pipe: Text2TextGenerationPipeline, text: string, { bullets = CHUNK_BULLETS } = {}): Promise<string> {
   const prompt = bulletPrompt(text, bullets);
   const out = await pipe(prompt, { max_new_tokens: MAX_NEW_TOKENS });
   // Normalize to "- " bullets, dedupe locally
-  return dedupeBullets(hardWrapBullets(out[0].generated_text || ''));
+  const output = out[0] as { generated_text?: string };
+  return dedupeBullets(hardWrapBullets(output.generated_text || ''));
 }
 
-async function summarizeHierarchical(fullText, {
+async function summarizeHierarchical(fullText: string, {
   model = 'Xenova/t5-small',
   maxChunkChars = MAX_CHUNK_CHARS,
   overlap = CHUNK_OVERLAP,
   perChunkBullets = CHUNK_BULLETS,
   finalBullets = FINAL_BULLETS,
+}: {
+  model?: string;
+  maxChunkChars?: number;
+  overlap?: number;
+  perChunkBullets?: number;
+  finalBullets?: number;
 } = {}) {
   const pipe = await loadPipe(model);
   const chunks = splitIntoChunks(fullText, maxChunkChars, overlap);
 
   // First-pass summaries (parallel, concurrency-limited)
   const tasks = chunks.map(chunk => () => summarizeChunk(pipe, chunk, { bullets: perChunkBullets }));
-  const perChunk = await limitConcurrency(tasks, CONCURRENCY);
+  const perChunk: string[] = await limitConcurrency(tasks, CONCURRENCY);
 
   // Merge & second-pass summary
   const merged = dedupeBullets(perChunk.join('\n'));
   const finalPrompt = finalBulletPrompt(merged, finalBullets);
   const finalOut = await pipe(finalPrompt, { max_new_tokens: MAX_NEW_TOKENS });
 
-  const finalBulletsStr = dedupeBullets(hardWrapBullets(finalOut[0].generated_text || ''));
+  const output = finalOut[0] as { generated_text?: string };
+  const finalBulletsStr = dedupeBullets(hardWrapBullets(output.generated_text || ''));
   return { perChunk, merged, final: finalBulletsStr };
 }
 
@@ -175,3 +183,4 @@ console.log('\n--- FINAL BULLETS ---\n' + final);
 */
 
 export { summarizeHierarchical };
+// ninja focus touch >
