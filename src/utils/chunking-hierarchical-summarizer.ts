@@ -11,6 +11,9 @@ const CHUNK_BULLETS   = 3;        // target bullets per chunk (reduced for bette
 const FINAL_BULLETS   = 5;        // target bullets in the final summary
 const MAX_NEW_TOKENS  = 200;      // generation cap per call (increased for better completion)
 
+// Ensure we don't try to access local models inside the worker
+env.allowLocalModels = false;
+
 // Optional runtime hints (Browser):
 env.backends.onnx.wasm.numThreads = Math.max(1, Math.min(CONCURRENCY, (globalThis.navigator?.hardwareConcurrency ?? 4)));
 /*
@@ -194,7 +197,7 @@ async function summarizeChunk(pipe: Text2TextGenerationPipeline, text: string, {
   return result;
 }
 
-async function summarizeHierarchical(fullText: string, {
+async function chunkingHierarchicalSummarize(fullText: string, {
   model = 'Xenova/distilbart-cnn-6-6',
   maxChunkChars = MAX_CHUNK_CHARS,
   overlap = CHUNK_OVERLAP,
@@ -270,7 +273,7 @@ async function summarizeHierarchical(fullText: string, {
 /*
 import fs from 'node:fs/promises';
 const transcript = await fs.readFile('./transcription.txt', 'utf8');
-const { perChunk, merged, final } = await summarizeHierarchical(transcript, {
+const { perChunk, merged, final } = await chunkingHierarchicalSummarize(transcript, {
   model: 'Xenova/t5-small',     // or your mirror
   maxChunkChars: 2400,
   perChunkBullets: 5,
@@ -279,5 +282,5 @@ const { perChunk, merged, final } = await summarizeHierarchical(transcript, {
 console.log('\n--- FINAL BULLETS ---\n' + final);
 */
 
-export { summarizeHierarchical };
+export { chunkingHierarchicalSummarize };
 // ninja focus touch >

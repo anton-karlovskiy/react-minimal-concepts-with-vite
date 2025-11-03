@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import Button from "./UI/Button";
 import Textarea from "./UI/Textarea";
-import { summarizeHierarchical } from "../utils/hierarchical-bullets";
+import { chunkingHierarchicalSummarize } from "../utils/chunking-hierarchical-summarizer";
 
 function ChunkSummarizerDemo() {
   const [text, setText] = useState("");
@@ -25,7 +25,7 @@ function ChunkSummarizerDemo() {
     setResult(null);
 
     try {
-      const summary = await summarizeHierarchical(text);
+      const summary = await chunkingHierarchicalSummarize(text);
 
       console.log("ninja focus touch: summary.final =>", summary.final);
       console.log("ninja focus touch: summary.perChunk =", summary.perChunk);
