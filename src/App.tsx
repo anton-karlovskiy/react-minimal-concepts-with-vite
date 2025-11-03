@@ -69,7 +69,7 @@ export default function App() {
           </Card>
           {/* ninja focus touch < */}
           <Card>
-            <DemoTitle>Hierarchical Bullet Summarization</DemoTitle>
+            <DemoTitle>Chunking + Hierarchical Bullet Summarization</DemoTitle>
             <ChunkSummarizerDemo />
           </Card>
           {/* ninja focus touch > */}

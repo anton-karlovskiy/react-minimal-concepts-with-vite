@@ -1,4 +1,3 @@
-// ninja focus touch <
 // Works in browser (ESM) or Node >=18 with "type": "module"
 
 import { pipeline, env, Text2TextGenerationPipeline } from '@xenova/transformers';
@@ -283,4 +282,3 @@ console.log('\n--- FINAL BULLETS ---\n' + final);
 */
 
 export { chunkingHierarchicalSummarize };
-// ninja focus touch >

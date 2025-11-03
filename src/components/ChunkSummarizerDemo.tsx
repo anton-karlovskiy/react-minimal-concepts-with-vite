@@ -1,4 +1,3 @@
-// ninja focus touch <
 import { useState, useCallback } from "react";
 import Button from "./UI/Button";
 import Textarea from "./UI/Textarea";
@@ -112,4 +111,3 @@ function ChunkSummarizerDemo() {
 }
 
 export default ChunkSummarizerDemo;
-// ninja focus touch >
