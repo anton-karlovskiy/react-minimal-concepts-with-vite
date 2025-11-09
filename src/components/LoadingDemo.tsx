@@ -23,9 +23,9 @@ interface GeoPositionState {
 }
 
 type GeoPositionAction =
-  | { type: 'error'; error: Error | GeolocationPositionError }
-  | { type: 'success'; position: GeolocationPosition }
-  | { type: 'start' };
+  | { type: 'error'; error: Error | GeolocationPositionError; }
+  | { type: 'success'; position: GeolocationPosition; }
+  | { type: 'start'; }
 
 function geoPositionReducer(state: GeoPositionState, action: GeoPositionAction): GeoPositionState {
   switch (action.type) {
@@ -90,7 +90,7 @@ function YourPosition() {
 
   if (status === 'resolved') {
     if (!position) {
-      throw new Error('Position is null');
+      throw new Error('Position is null')
     }
 
     return (
@@ -102,7 +102,7 @@ function YourPosition() {
 
   if (status === 'rejected') {
     if (!error) {
-      throw new Error('Error is null');
+      throw new Error('Error is null')
     }
     
     return (
@@ -117,7 +117,7 @@ function YourPosition() {
 function LoadingDemo() {
   return (
     <YourPosition />
-  );
+  )
 }
 
-export default LoadingDemo;
+export default LoadingDemo
