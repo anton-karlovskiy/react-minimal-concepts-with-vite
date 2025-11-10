@@ -65,11 +65,13 @@ function ActionsDemo() {
     }
   );
 
+  type FormState = string | null;
+
   // The action that the <form> will call
   async function addNote(
-    prevState: string | null,
+    prevState: FormState,
     formData: FormData
-  ): Promise<string | null> {
+  ): Promise<FormState> {
     const text = String(formData.get("text") || "").trim();
     if (!text) return "Please enter some text";
 
@@ -94,16 +96,16 @@ function ActionsDemo() {
   }
 
   // Bind the action to the form & expose last error message (if any)
-  const [error, formAction] = useActionState(addNote, null as string | null);
+  const [state, formAction] = useActionState(addNote, null);
 
   return (
     <section className="space-y-2">
       <p>React 19 <Code>{"<form action={...}>"}</Code> + <Code>useActionState</Code> (submit + error handling) + <Code>useFormStatus</Code> (pending state on the button) + <Code>useOptimistic</Code> (instant UI while the server works)</p>
-      <form action={formAction} className={error ? "opacity-60" : ""}>
+      <form action={formAction} className={state ? "opacity-60" : ""}>
         <Textarea name="text" placeholder="Write a note…" rows={3} />
         <div className="mt-2">
           <SubmitButton />
-          {error && <span className="ml-3 text-[#ffb3b3]">{error}</span>}
+          {state && <span className="ml-3 text-[#ffb3b3]">{state}</span>}
         </div>
       </form>
       <ul>
